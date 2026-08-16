@@ -1,0 +1,28 @@
+export {
+	create,
+	findAll,
+	findOne,
+	nearby,
+	remove,
+	removeImage,
+	update,
+	uploadImage,
+} from "./api/products";
+export {
+	useCreateProduct,
+	useGetAllProducts,
+	useRemoveProductImage,
+	useSetProductActive,
+	useUpdateProduct,
+	useUploadProductImage,
+} from "./hooks";
+export type {
+	CreateProductDto,
+	FindNearbyProductsQuery,
+	FindProductsQuery,
+	Product,
+	ProductAvailability,
+	ProductImageDto,
+	ProductImageUploadResponseDto,
+	UpdateProductDto,
+} from "./model/types";
