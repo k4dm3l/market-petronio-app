@@ -90,4 +90,9 @@ export const queryKeys = {
 	geolocation: {
 		search: (query: string) => ["geolocation", "search", query] as const,
 	},
+	locations: {
+		search: (params: Record<string, unknown>) =>
+			["locations", "search", params] as const,
+		place: (placeId: string) => ["locations", "place", placeId] as const,
+	},
 } as const;
