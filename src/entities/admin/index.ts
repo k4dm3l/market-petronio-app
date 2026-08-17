@@ -1,5 +1,6 @@
 export {
 	listCategories,
+	listCategoriesPage,
 	listCooks,
 	listCooksPage,
 	listCustomers,

@@ -39,6 +39,12 @@ export const queryKeys = {
 			params
 				? (["categories", "list-admin", params] as const)
 				: (["categories", "list-admin"] as const),
+		// Nested under the same "list-admin" prefix so invalidating
+		// `listAdmin()` (no args) also invalidates this infinite-scroll cache.
+		listAdminInfinite: (params?: Record<string, unknown>) =>
+			params
+				? (["categories", "list-admin", "infinite", params] as const)
+				: (["categories", "list-admin", "infinite"] as const),
 		detail: (id: string) => ["categories", "detail", id] as const,
 	},
 	orders: {

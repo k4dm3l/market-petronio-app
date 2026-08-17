@@ -80,12 +80,19 @@ export function listOrders(
 		.then((res) => res.data.data);
 }
 
-export function listCategories(
+/** Full paginated envelope — for infinite-scroll consumers that need `pagination`. */
+export function listCategoriesPage(
 	query: AdminSearchQuery = {},
-): Promise<Category[]> {
+): Promise<PaginatedResponseDto<Category>> {
 	return http
 		.get<PaginatedResponseDto<Category>>("/api/admin/categories", {
 			params: query,
 		})
-		.then((res) => res.data.data);
+		.then((res) => res.data);
+}
+
+export function listCategories(
+	query: AdminSearchQuery = {},
+): Promise<Category[]> {
+	return listCategoriesPage(query).then((res) => res.data);
 }

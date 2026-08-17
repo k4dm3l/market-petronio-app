@@ -8,6 +8,7 @@ export {
 export {
 	useCreateCategory,
 	useGetAllCategories,
+	useGetAllCategoriesInfinite,
 	useGetCategories,
 	useSetCategoryActive,
 } from "./hooks";

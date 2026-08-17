@@ -1,7 +1,11 @@
 import { Tag } from "lucide-react";
-import { useState } from "react";
-import { useGetAllCategories } from "@/entities/categories";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router";
+import { useGetAllCategoriesInfinite } from "@/entities/categories";
+import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
+import { Spinner } from "@/shared/components/ui/spinner";
+import { useDebouncedValue } from "@/shared/hooks";
 import {
 	AdminListHeader,
 	CategoryFormDialog,
@@ -10,19 +14,44 @@ import {
 } from "./components";
 
 export function AdminCategoriesPage() {
-	const [query, setQuery] = useState("");
-	const { data, isPending, isError } = useGetAllCategories(query);
+	const [searchParams, setSearchParams] = useSearchParams();
+	const [query, setQuery] = useState(searchParams.get("q") ?? "");
+	const debouncedQuery = useDebouncedValue(query, 400);
 
-	const activeCount = data?.filter((category) => category.isActive).length;
+	// Only pushes to the URL once the user stops typing, so every keystroke
+	// doesn't spam a browser history / query-string update.
+	useEffect(() => {
+		setSearchParams(
+			(prev) => {
+				const params = new URLSearchParams(prev);
+				if (debouncedQuery) params.set("q", debouncedQuery);
+				else params.delete("q");
+				return params;
+			},
+			{ replace: true },
+		);
+	}, [debouncedQuery, setSearchParams]);
+
+	const {
+		data,
+		isPending,
+		isError,
+		fetchNextPage,
+		hasNextPage,
+		isFetchingNextPage,
+	} = useGetAllCategoriesInfinite(query);
+
+	const categories = data?.pages.flatMap((page) => page.data);
+	const activeCount = categories?.filter((category) => category.isActive).length;
 
 	return (
 		<div>
 			<AdminListHeader
 				title="Categorías"
 				description={
-					data === undefined
+					categories === undefined
 						? "Cargando el listado de categorías..."
-						: `${data.length} categorías · ${activeCount} activas`
+						: `${categories.length} categorías cargadas · ${activeCount} activas`
 				}
 				searchValue={query}
 				onSearchChange={setQuery}
@@ -48,9 +77,9 @@ export function AdminCategoriesPage() {
 				</div>
 			)}
 
-			{data !== undefined && data.length > 0 && (
+			{categories !== undefined && categories.length > 0 && (
 				<div className="overflow-hidden rounded-2xl border border-border bg-card">
-					{data.map((category, index) => (
+					{categories.map((category, index) => (
 						<div key={category.id}>
 							{index > 0 && <Separator />}
 							<CategoryRow category={category} />
@@ -59,7 +88,27 @@ export function AdminCategoriesPage() {
 				</div>
 			)}
 
-			{data !== undefined && data.length === 0 && (
+			{hasNextPage && (
+				<div className="mt-6 flex justify-center">
+					<Button
+						type="button"
+						variant="outline"
+						onClick={() => fetchNextPage()}
+						disabled={isFetchingNextPage}
+					>
+						{isFetchingNextPage ? (
+							<>
+								<Spinner className="size-4" />
+								Cargando...
+							</>
+						) : (
+							"Cargar más"
+						)}
+					</Button>
+				</div>
+			)}
+
+			{categories !== undefined && categories.length === 0 && (
 				<div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
 					<div className="flex size-11 items-center justify-center rounded-xl bg-muted text-muted-foreground">
 						<Tag className="size-5" />
