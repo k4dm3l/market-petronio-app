@@ -1,4 +1,8 @@
 import { useMemo, useState } from "react";
+import { useGetCategories } from "@/entities/categories";
+import { useGetProducts } from "@/entities/products";
+import { useGetTags } from "@/entities/tags";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import {
 	CartSheet,
 	FiltersSheet,
@@ -14,19 +18,31 @@ import {
 	hasActiveFilters,
 	type ProductFilters,
 } from "./filters";
-import { MOCK_CATEGORIES, MOCK_PRODUCTS, MOCK_TAGS } from "./mock-data";
 
 export function CustomerSearchPage() {
 	const [filters, setFilters] = useState<ProductFilters>(EMPTY_FILTERS);
 	const [isCartOpen, setIsCartOpen] = useState(false);
 
+	// Loaded once and filtered client-side below — category/tag chips are
+	// multi-select, which /api/products (single categoryId) can't express in
+	// one request, so search/category/tag/price all apply locally over this
+	// page instead of round-tripping per filter change.
+	const {
+		data: products,
+		isPending: isProductsPending,
+		isError: isProductsError,
+	} = useGetProducts({ limit: 100 });
+	const { data: categories } = useGetCategories({ limit: 100 });
+	const { data: tags } = useGetTags("", 100);
+
 	const filteredProducts = useMemo(
-		() => filterProducts(MOCK_PRODUCTS, filters),
-		[filters],
+		() => filterProducts(products ?? [], filters),
+		[products, filters],
 	);
 	const activeFilters = hasActiveFilters(filters);
 	const activeCount = countActiveFilters(filters);
 	const clearFilters = () => setFilters(EMPTY_FILTERS);
+	const tagTexts = useMemo(() => tags?.map((tag) => tag.text) ?? [], [tags]);
 
 	return (
 		<div className="flex h-screen flex-col overflow-hidden bg-background">
@@ -34,8 +50,8 @@ export function CustomerSearchPage() {
 
 			<div className="flex flex-1 overflow-hidden">
 				<Sidebar
-					categories={MOCK_CATEGORIES}
-					tags={MOCK_TAGS}
+					categories={categories ?? []}
+					tags={tagTexts}
 					filters={filters}
 					onChange={setFilters}
 					onClear={clearFilters}
@@ -63,8 +79,8 @@ export function CustomerSearchPage() {
 
 							<div className="flex items-center justify-between gap-3 lg:hidden">
 								<FiltersSheet
-									categories={MOCK_CATEGORIES}
-									tags={MOCK_TAGS}
+									categories={categories ?? []}
+									tags={tagTexts}
 									filters={filters}
 									onChange={setFilters}
 									onClear={clearFilters}
@@ -83,7 +99,21 @@ export function CustomerSearchPage() {
 							</span>
 						</div>
 
-						<ProductGrid products={filteredProducts} />
+						{isProductsError && (
+							<p className="text-sm text-destructive">
+								No se pudieron cargar los productos.
+							</p>
+						)}
+
+						{isProductsPending ? (
+							<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+								{Array.from({ length: 6 }).map((_, index) => (
+									<Skeleton key={index} className="aspect-[4/5] rounded-2xl" />
+								))}
+							</div>
+						) : (
+							<ProductGrid products={filteredProducts} />
+						)}
 					</div>
 				</main>
 			</div>

@@ -8,6 +8,7 @@ export {
 	updateStatus,
 } from "./api/orders";
 export {
+	useCreateOrder,
 	useGetAllOrders,
 	useGetOrder,
 	useGetOrders,

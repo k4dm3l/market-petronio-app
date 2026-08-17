@@ -1,3 +1,4 @@
+export { CartLineItem } from "./cart-line-item";
 export { CartSheet } from "./cart-sheet";
 export { FiltersPanel } from "./filters-panel";
 export { FiltersSheet } from "./filters-sheet";

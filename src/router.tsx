@@ -27,7 +27,11 @@ import {
 	CookOrdersPage,
 	CookProductsPage,
 } from "@/pages/cook";
-import { CustomerOrdersPage, CustomerSearchPage } from "@/pages/customer";
+import {
+	CustomerCheckoutPage,
+	CustomerOrdersPage,
+	CustomerSearchPage,
+} from "@/pages/customer";
 import { NotFoundPage } from "@/pages/not-found";
 
 export const router = createBrowserRouter([
@@ -108,6 +112,14 @@ export const router = createBrowserRouter([
 		element: (
 			<RequireRole roles={[Role.Customer]}>
 				<CustomerOrdersPage />
+			</RequireRole>
+		),
+	},
+	{
+		path: "/checkout",
+		element: (
+			<RequireRole roles={[Role.Customer]}>
+				<CustomerCheckoutPage />
 			</RequireRole>
 		),
 	},

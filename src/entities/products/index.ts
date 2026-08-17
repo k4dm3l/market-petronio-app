@@ -13,6 +13,7 @@ export {
 	useGetAllProducts,
 	useGetAllProductsInfinite,
 	useGetProduct,
+	useGetProducts,
 	useRemoveProductImage,
 	useSetProductActive,
 	useUpdateProduct,

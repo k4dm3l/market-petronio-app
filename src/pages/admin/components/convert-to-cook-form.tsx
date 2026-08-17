@@ -3,6 +3,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { Link } from "react-router";
 import type { CreateCookDto } from "@/entities/cooks";
 import { useCreateCook } from "@/entities/cooks";
+import { LocationSearchField } from "@/features/geolocation";
 import { Button } from "@/shared/components/ui/button";
 import {
 	Field,
@@ -18,7 +19,6 @@ import {
 	convertToCookSchema,
 	type ConvertToCookFormValues,
 } from "../schemas/convert-to-cook.schema";
-import { LocationSearchField } from "./location-search-field";
 import { PaymentMethodsField } from "./payment-methods-field";
 import { SpecialtyChipsField } from "./specialty-chips-field";
 
