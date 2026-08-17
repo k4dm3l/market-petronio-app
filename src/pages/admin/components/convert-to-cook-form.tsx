@@ -55,13 +55,13 @@ export function ConvertToCookForm({ userId, onSuccess }: ConvertToCookFormProps)
 		const payload: CreateCookDto = {
 			userId,
 			displayName: values.displayName,
-			bio: values.bio || undefined,
+			bio: values.bio,
 			specialties: values.specialties,
 			publicLocation: values.publicLocation,
 			latitude: values.latitude,
 			longitude: values.longitude,
 			paymentMethods: values.paymentMethods,
-			contactWhatsApp: values.contactWhatsApp || undefined,
+			contactWhatsApp: values.contactWhatsApp,
 		};
 		createCook.mutate(payload, { onSuccess });
 	});
@@ -85,14 +85,19 @@ export function ConvertToCookForm({ userId, onSuccess }: ConvertToCookFormProps)
 					</FieldContent>
 				</Field>
 
-				<Field>
+				<Field data-invalid={!!formState.errors.bio}>
 					<FieldLabel htmlFor="convert-cook-bio">Bio</FieldLabel>
 					<FieldContent>
-						<Textarea id="convert-cook-bio" {...register("bio")} />
+						<Textarea
+							id="convert-cook-bio"
+							aria-invalid={!!formState.errors.bio}
+							{...register("bio")}
+						/>
+						<FieldError errors={[formState.errors.bio]} />
 					</FieldContent>
 				</Field>
 
-				<Field>
+				<Field data-invalid={!!formState.errors.specialties}>
 					<FieldLabel htmlFor="convert-cook-specialties">
 						Especialidades
 					</FieldLabel>
@@ -100,10 +105,15 @@ export function ConvertToCookForm({ userId, onSuccess }: ConvertToCookFormProps)
 						<SpecialtyChipsField
 							id="convert-cook-specialties"
 							value={specialties}
+							hasError={!!formState.errors.specialties}
 							onChange={(next) =>
-								setValue("specialties", next, { shouldDirty: true })
+								setValue("specialties", next, {
+									shouldDirty: true,
+									shouldValidate: true,
+								})
 							}
 						/>
+						<FieldError errors={[formState.errors.specialties]} />
 					</FieldContent>
 				</Field>
 
@@ -196,7 +206,18 @@ export function ConvertToCookForm({ userId, onSuccess }: ConvertToCookFormProps)
 				<Separator />
 				<h2 className="text-2xl font-semibold">Métodos de pago</h2>
 
-				<PaymentMethodsField control={control} />
+				<Field data-invalid={!!formState.errors.paymentMethods}>
+					<FieldContent>
+						<PaymentMethodsField control={control} />
+						<FieldError
+							errors={[
+								Array.isArray(formState.errors.paymentMethods)
+									? undefined
+									: formState.errors.paymentMethods,
+							]}
+						/>
+					</FieldContent>
+				</Field>
 
 				<Separator />
 
