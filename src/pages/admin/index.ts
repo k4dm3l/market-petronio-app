@@ -7,6 +7,7 @@ export { AdminCreateProductPage } from "./create-product-page";
 export { AdminCustomersPage } from "./customers-page";
 export { AdminDashboardPage } from "./dashboard-page";
 export { AdminEditProductPage } from "./edit-product-page";
+export { AdminOrderDetailPage } from "./order-detail-page";
 export { AdminOrdersPage } from "./orders-page";
 export { AdminProductsPage } from "./products-page";
 export { AdminTagsPage } from "./tags-page";

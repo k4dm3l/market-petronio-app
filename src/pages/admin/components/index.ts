@@ -5,7 +5,6 @@ export { CookRow, CookRowSkeleton } from "./cook-row";
 export { CustomerRow, CustomerRowSkeleton } from "./customer-row";
 export { AdminMenuSheet } from "./menu-sheet";
 export { AdminNavbar } from "./navbar";
-export { OrderRow, OrderRowSkeleton } from "./order-row";
 export { AdminSidebar } from "./sidebar";
 export { TagFormDialog } from "./tag-form-dialog";
 export { TagRow, TagRowSkeleton } from "./tag-row";

@@ -11,6 +11,7 @@ import {
 	AdminDashboardPage,
 	AdminEditProductPage,
 	AdminLayout,
+	AdminOrderDetailPage,
 	AdminOrdersPage,
 	AdminProductsPage,
 	AdminTagsPage,
@@ -32,6 +33,7 @@ import {
 } from "@/pages/cook";
 import {
 	CustomerCheckoutPage,
+	CustomerOrderDetailPage,
 	CustomerOrdersPage,
 	CustomerSearchPage,
 } from "@/pages/customer";
@@ -86,6 +88,7 @@ export const router = createBrowserRouter([
 			{ path: "categories", element: <AdminCategoriesPage /> },
 			{ path: "tags", element: <AdminTagsPage /> },
 			{ path: "orders", element: <AdminOrdersPage /> },
+			{ path: "orders/:id", element: <AdminOrderDetailPage /> },
 			{ path: "products", element: <AdminProductsPage /> },
 			{ path: "*", element: <Navigate to="/admin" replace /> },
 		],
@@ -121,6 +124,14 @@ export const router = createBrowserRouter([
 		element: (
 			<RequireRole roles={[Role.Customer]}>
 				<CustomerOrdersPage />
+			</RequireRole>
+		),
+	},
+	{
+		path: "/my-orders/:id",
+		element: (
+			<RequireRole roles={[Role.Customer]}>
+				<CustomerOrderDetailPage />
 			</RequireRole>
 		),
 	},

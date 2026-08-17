@@ -1,8 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
-import { OrderStatusBadge, PaymentStatusBadge } from "@/features/orders";
-import { formatCurrency, formatDate } from "@/shared/lib/format";
+import { OrdersListView } from "@/features/orders";
 import { CartSheet, Navbar } from "./components";
 import { MOCK_ORDERS } from "./mock-orders";
 
@@ -32,40 +31,11 @@ export function CustomerOrdersPage() {
 						</p>
 					</div>
 
-					{MOCK_ORDERS.length === 0 ? (
-						<div className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-dashed border-border py-16 text-center">
-							<p className="text-sm font-medium">Aún no tienes pedidos</p>
-							<p className="text-sm text-muted-foreground">
-								Cuando hagas tu primer pedido, lo verás aquí.
-							</p>
-						</div>
-					) : (
-						<ul className="flex flex-col gap-3">
-							{MOCK_ORDERS.map((order) => (
-								<li
-									key={order.id}
-									className="flex flex-col gap-3 rounded-2xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between"
-								>
-									<div>
-										<p className="text-sm font-semibold">
-											Pedido #{order.id.slice(-6).toUpperCase()}
-										</p>
-										<p className="text-sm text-muted-foreground">
-											{formatDate(order.createdAt)}
-										</p>
-									</div>
-
-									<div className="flex flex-wrap items-center gap-2">
-										<PaymentStatusBadge status={order.paymentStatus} />
-										<OrderStatusBadge status={order.status} />
-										<span className="text-sm font-bold">
-											{formatCurrency(order.total)}
-										</span>
-									</div>
-								</li>
-							))}
-						</ul>
-					)}
+					<OrdersListView
+						orders={MOCK_ORDERS}
+						detailHrefFor={(id) => `/my-orders/${id}`}
+						emptyMessage="Cuando hagas tu primer pedido, lo verás aquí."
+					/>
 				</div>
 			</main>
 

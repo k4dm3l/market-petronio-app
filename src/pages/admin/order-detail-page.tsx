@@ -1,10 +1,11 @@
 import { ArrowLeft } from "lucide-react";
-import { useState } from "react";
 import { Link, useParams } from "react-router";
 import {
 	OrderPaymentStatus,
-	type OrderResponseDto,
 	type OrderStatus,
+	useGetOrder,
+	useUpdateOrderPayment,
+	useUpdateOrderStatus,
 } from "@/entities/orders";
 import { ORDER_STATUS_META, OrderDetailView } from "@/features/orders";
 import { Button } from "@/shared/components/ui/button";
@@ -16,35 +17,31 @@ import {
 	SelectValue,
 } from "@/shared/components/ui/select";
 import { Separator } from "@/shared/components/ui/separator";
-import { MOCK_ORDER_DETAILS } from "./mock-order-details";
 
-export function CookOrderDetailPage() {
+export function AdminOrderDetailPage() {
 	const { id = "" } = useParams();
-	// No backend order to update yet — status/payment controls mutate this
-	// local copy instead of calling the real API (which would 404 on a mock id).
-	const [order, setOrder] = useState<OrderResponseDto | undefined>(() =>
-		MOCK_ORDER_DETAILS.find((candidate) => candidate.id === id),
-	);
+	const { data: order, isPending, isError } = useGetOrder(id);
+	const updateStatus = useUpdateOrderStatus();
+	const updatePayment = useUpdateOrderPayment();
 
 	const isPaid = order?.payment.status === OrderPaymentStatus.Paid;
 
 	return (
 		<div className="flex flex-col gap-6">
 			<Link
-				to="/orders"
+				to="/admin/orders"
 				className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
 			>
 				<ArrowLeft className="size-4" />
 				Volver a pedidos
 			</Link>
 
-			{!order && (
-				<p className="text-sm text-muted-foreground">
-					Pedido no encontrado.{" "}
-					<Link to="/orders" className="underline">
-						Volver a pedidos
-					</Link>
-				</p>
+			{isPending && (
+				<p className="text-sm text-muted-foreground">Cargando pedido...</p>
+			)}
+
+			{isError && (
+				<p className="text-sm text-destructive">No se pudo cargar el pedido.</p>
 			)}
 
 			{order && (
@@ -61,7 +58,10 @@ export function CookOrderDetailPage() {
 							<Select
 								value={order.status}
 								onValueChange={(value) =>
-									setOrder({ ...order, status: value as OrderStatus })
+									updateStatus.mutate({
+										id: order.id,
+										payload: { status: value as OrderStatus },
+									})
 								}
 							>
 								<SelectTrigger className="w-56">
@@ -82,11 +82,11 @@ export function CookOrderDetailPage() {
 						<Button
 							type="button"
 							variant={isPaid ? "outline" : "default"}
+							disabled={updatePayment.isPending}
 							onClick={() =>
-								setOrder({
-									...order,
-									payment: {
-										...order.payment,
+								updatePayment.mutate({
+									id: order.id,
+									payload: {
 										status: isPaid
 											? OrderPaymentStatus.Pending
 											: OrderPaymentStatus.Paid,
