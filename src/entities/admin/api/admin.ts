@@ -30,10 +30,17 @@ export function setCustomerActive(
 		.then((res) => res.data);
 }
 
-export function listCooks(query: AdminSearchQuery = {}): Promise<Cook[]> {
+/** Full paginated envelope — for infinite-scroll consumers that need `pagination`. */
+export function listCooksPage(
+	query: AdminSearchQuery = {},
+): Promise<PaginatedResponseDto<Cook>> {
 	return http
 		.get<PaginatedResponseDto<Cook>>("/api/admin/cooks", { params: query })
-		.then((res) => res.data.data);
+		.then((res) => res.data);
+}
+
+export function listCooks(query: AdminSearchQuery = {}): Promise<Cook[]> {
+	return listCooksPage(query).then((res) => res.data);
 }
 
 export function setCookActive(

@@ -15,6 +15,10 @@ export interface PaginatedResponseDto<T> {
 /** GET /api/admin/{customers,cooks,categories} all support this. */
 export interface AdminSearchQuery {
 	search?: string;
+	/** Page size (1–100) */
+	limit?: number;
+	/** Opaque cursor from the previous page `pagination.nextCursor` */
+	cursor?: string;
 }
 
 /** GET /api/admin/orders additionally supports a status filter. */

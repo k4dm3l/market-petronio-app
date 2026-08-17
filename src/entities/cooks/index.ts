@@ -1,5 +1,10 @@
 export { create, dashboard, findAll, findOne, update } from "./api/cooks";
-export { useCreateCook, useGetAllCooks, useSetCookActive } from "./hooks";
+export {
+	useCreateCook,
+	useGetAllCooks,
+	useGetAllCooksInfinite,
+	useSetCookActive,
+} from "./hooks";
 export type {
 	Cook,
 	CookLocationDto,

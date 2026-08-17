@@ -1,6 +1,7 @@
 export {
 	listCategories,
 	listCooks,
+	listCooksPage,
 	listCustomers,
 	listOrders,
 	listProducts,
@@ -11,5 +12,6 @@ export {
 export type {
 	AdminOrdersQuery,
 	AdminSearchQuery,
+	PaginatedResponseDto,
 	SetActiveDto,
 } from "./model/types";
