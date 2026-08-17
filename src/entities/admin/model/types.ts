@@ -25,3 +25,11 @@ export interface AdminSearchQuery {
 export interface AdminOrdersQuery extends AdminSearchQuery {
 	status?: string;
 }
+
+/** GET /api/admin/products only takes these — no `search` support server-side. */
+export interface AdminCursorQuery {
+	/** Page size (1–100) */
+	limit?: number;
+	/** Opaque cursor from the previous page `pagination.nextCursor` */
+	cursor?: string;
+}

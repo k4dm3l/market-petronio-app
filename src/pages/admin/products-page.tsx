@@ -1,8 +1,10 @@
 import { Package } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useGetAllCooks } from "@/entities/cooks";
-import { useGetAllProducts } from "@/entities/products";
+import { useGetAllProductsInfinite } from "@/entities/products";
+import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
+import { Spinner } from "@/shared/components/ui/spinner";
 import {
 	AdminListHeader,
 	ProductRow,
@@ -17,9 +19,21 @@ function normalize(value: string) {
 }
 
 export function AdminProductsPage() {
-	const { data, isPending, isError } = useGetAllProducts();
-	const { data: cooks } = useGetAllCooks();
+	// Purely client-side filtering (no `search` param on /api/admin/products),
+	// so this stays local state rather than syncing to the URL.
 	const [query, setQuery] = useState("");
+
+	const {
+		data,
+		isPending,
+		isError,
+		fetchNextPage,
+		hasNextPage,
+		isFetchingNextPage,
+	} = useGetAllProductsInfinite();
+	const { data: cooks } = useGetAllCooks();
+
+	const products = data?.pages.flatMap((page) => page.data);
 
 	const cookNameById = useMemo(() => {
 		const map = new Map<string, string>();
@@ -27,27 +41,29 @@ export function AdminProductsPage() {
 		return map;
 	}, [cooks]);
 
+	// /api/admin/products has no `search` param — filters client-side over
+	// whatever pages have been loaded so far.
 	const filtered = useMemo(() => {
-		if (!data) return [];
+		if (!products) return [];
 		const q = normalize(query.trim());
-		if (!q) return data;
-		return data.filter((product) =>
+		if (!q) return products;
+		return products.filter((product) =>
 			[product.name, product.description, ...product.tags]
 				.filter((value): value is string => Boolean(value))
 				.some((value) => normalize(value).includes(q)),
 		);
-	}, [data, query]);
+	}, [products, query]);
 
-	const activeCount = data?.filter((product) => product.isActive).length;
+	const activeCount = products?.filter((product) => product.isActive).length;
 
 	return (
 		<div>
 			<AdminListHeader
 				title="Productos"
 				description={
-					data === undefined
+					products === undefined
 						? "Cargando el listado de productos..."
-						: `${data.length} productos · ${activeCount} activos`
+						: `${products.length} productos cargados · ${activeCount} activos`
 				}
 				searchValue={query}
 				onSearchChange={setQuery}
@@ -72,7 +88,7 @@ export function AdminProductsPage() {
 				</div>
 			)}
 
-			{data !== undefined && filtered.length > 0 && (
+			{products !== undefined && filtered.length > 0 && (
 				<div className="overflow-hidden rounded-2xl border border-border bg-card">
 					{filtered.map((product, index) => (
 						<div key={product.id}>
@@ -86,7 +102,27 @@ export function AdminProductsPage() {
 				</div>
 			)}
 
-			{data !== undefined && filtered.length === 0 && (
+			{hasNextPage && (
+				<div className="mt-6 flex justify-center">
+					<Button
+						type="button"
+						variant="outline"
+						onClick={() => fetchNextPage()}
+						disabled={isFetchingNextPage}
+					>
+						{isFetchingNextPage ? (
+							<>
+								<Spinner className="size-4" />
+								Cargando...
+							</>
+						) : (
+							"Cargar más"
+						)}
+					</Button>
+				</div>
+			)}
+
+			{products !== undefined && filtered.length === 0 && (
 				<div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
 					<div className="flex size-11 items-center justify-center rounded-xl bg-muted text-muted-foreground">
 						<Package className="size-5" />

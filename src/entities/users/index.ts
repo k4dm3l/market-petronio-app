@@ -12,6 +12,7 @@ export {
 	useDeleteAddress,
 	useDeleteProfileImage,
 	useGetCustomers,
+	useGetCustomersInfinite,
 	useGetMe,
 	useSetCustomerActive,
 	useUpdateAddress,

@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import {
 	createContext,
@@ -30,6 +31,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
 	const [session, setSession] = useState<Session | null>(() => readSession());
+	const queryClient = useQueryClient();
 
 	const signIn = useCallback((next: Session) => {
 		writeSession(next);
@@ -39,11 +41,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const signOut = useCallback(() => {
 		clearSession();
 		setSession(null);
-	}, []);
+		// Cached data belongs to this session — a next login (possibly a
+		// different user, e.g. on a shared device) must not see it.
+		queryClient.clear();
+	}, [queryClient]);
 
 	// The http interceptor mutates the stored session directly (token
 	// refresh, or clearing it when refresh fails) outside of React state.
-	useEffect(() => onSessionSync(() => setSession(readSession())), []);
+	useEffect(
+		() =>
+			onSessionSync(() => {
+				const next = readSession();
+				setSession(next);
+				// Only a refresh-failure clears the session this way (a
+				// successful refresh just swaps the token, session stays set).
+				if (!next) queryClient.clear();
+			}),
+		[queryClient],
+	);
 
 	const value = useMemo<AuthContextValue>(
 		() => ({

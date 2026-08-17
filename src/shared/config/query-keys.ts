@@ -5,6 +5,12 @@ export const queryKeys = {
 		// against every cached search-term variant below it (exact: false).
 		customers: (params?: Record<string, unknown>) =>
 			params ? (["users", "customers", params] as const) : (["users", "customers"] as const),
+		// Nested under the same "customers" prefix so invalidating
+		// `customers()` (no args) also invalidates this infinite-scroll cache.
+		customersInfinite: (params?: Record<string, unknown>) =>
+			params
+				? (["users", "customers", "infinite", params] as const)
+				: (["users", "customers", "infinite"] as const),
 	},
 	cooks: {
 		all: () => ["cooks"] as const,
@@ -28,6 +34,10 @@ export const queryKeys = {
 		list: (params?: Record<string, unknown>) =>
 			["products", "list", params] as const,
 		listAdmin: () => ["products", "list-admin"] as const,
+		// Nested under the same "list-admin" prefix so invalidating
+		// `listAdmin()` also invalidates this infinite-scroll cache. No
+		// `search` param here — /api/admin/products doesn't support it.
+		listAdminInfinite: () => ["products", "list-admin", "infinite"] as const,
 		nearby: (params: Record<string, unknown>) =>
 			["products", "nearby", params] as const,
 		detail: (id: string) => ["products", "detail", id] as const,

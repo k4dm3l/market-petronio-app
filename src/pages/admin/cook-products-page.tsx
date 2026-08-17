@@ -2,9 +2,10 @@ import { ArrowLeft, Package, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 import { useGetAllCooks } from "@/entities/cooks";
-import { useGetAllProducts } from "@/entities/products";
+import { useGetAllProductsInfinite } from "@/entities/products";
 import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
+import { Spinner } from "@/shared/components/ui/spinner";
 import {
 	AdminListHeader,
 	ProductRow,
@@ -20,16 +21,28 @@ function normalize(value: string) {
 
 export function AdminCookProductsPage() {
 	const { id = "" } = useParams();
-	const { data: cooks, isPending: isCooksPending, isError: isCooksError } =
-		useGetAllCooks();
-	const { data: products, isPending: isProductsPending, isError: isProductsError } =
-		useGetAllProducts();
+	// Purely client-side filtering (no `search` param on /api/admin/products),
+	// so this stays local state rather than syncing to the URL.
 	const [query, setQuery] = useState("");
 
+	const { data: cooks, isPending: isCooksPending, isError: isCooksError } =
+		useGetAllCooks();
+	const {
+		data,
+		isPending: isProductsPending,
+		isError: isProductsError,
+		fetchNextPage,
+		hasNextPage,
+		isFetchingNextPage,
+	} = useGetAllProductsInfinite();
+
 	const cook = cooks?.find((c) => c.id === id);
+	const products = data?.pages.flatMap((page) => page.data);
 	const isPending = isCooksPending || isProductsPending;
 	const isError = isCooksError || isProductsError;
 
+	// /api/admin/products has no `search`/`cookId` params — filters
+	// client-side over whatever pages have been loaded so far.
 	const filtered = useMemo(() => {
 		if (!products || !cook) return [];
 		const cookProducts = products.filter((product) => product.cookId === cook.id);
@@ -113,6 +126,26 @@ export function AdminCookProductsPage() {
 									<ProductRow product={product} />
 								</div>
 							))}
+						</div>
+					)}
+
+					{hasNextPage && (
+						<div className="mt-6 flex justify-center">
+							<Button
+								type="button"
+								variant="outline"
+								onClick={() => fetchNextPage()}
+								disabled={isFetchingNextPage}
+							>
+								{isFetchingNextPage ? (
+									<>
+										<Spinner className="size-4" />
+										Cargando...
+									</>
+								) : (
+									"Cargar más"
+								)}
+							</Button>
 						</div>
 					)}
 

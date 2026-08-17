@@ -5,20 +5,28 @@ import type { Product } from "@/entities/products";
 import type { UserMeResponseDto } from "@/entities/users";
 import { http } from "@/shared/lib/http";
 import type {
+	AdminCursorQuery,
 	AdminOrdersQuery,
 	AdminSearchQuery,
 	PaginatedResponseDto,
 	SetActiveDto,
 } from "../model/types";
 
-export function listCustomers(
+/** Full paginated envelope — for infinite-scroll consumers that need `pagination`. */
+export function listCustomersPage(
 	query: AdminSearchQuery = {},
-): Promise<UserMeResponseDto[]> {
+): Promise<PaginatedResponseDto<UserMeResponseDto>> {
 	return http
 		.get<PaginatedResponseDto<UserMeResponseDto>>("/api/admin/customers", {
 			params: query,
 		})
-		.then((res) => res.data.data);
+		.then((res) => res.data);
+}
+
+export function listCustomers(
+	query: AdminSearchQuery = {},
+): Promise<UserMeResponseDto[]> {
+	return listCustomersPage(query).then((res) => res.data);
 }
 
 export function setCustomerActive(
@@ -53,12 +61,20 @@ export function setCookActive(
 }
 
 // No `search` param on this one — GET /api/admin/products only takes
-// limit/cursor per the API spec, so the admin products page still filters
-// client-side.
-export function listProducts(): Promise<Product[]> {
+// limit/cursor per the API spec, so text search still filters client-side
+// over whatever pages have been loaded.
+export function listProductsPage(
+	query: AdminCursorQuery = {},
+): Promise<PaginatedResponseDto<Product>> {
 	return http
-		.get<PaginatedResponseDto<Product>>("/api/admin/products")
-		.then((res) => res.data.data);
+		.get<PaginatedResponseDto<Product>>("/api/admin/products", {
+			params: query,
+		})
+		.then((res) => res.data);
+}
+
+export function listProducts(): Promise<Product[]> {
+	return listProductsPage().then((res) => res.data);
 }
 
 export function setProductActive(

@@ -11,6 +11,7 @@ export {
 export {
 	useCreateProduct,
 	useGetAllProducts,
+	useGetAllProductsInfinite,
 	useGetProduct,
 	useRemoveProductImage,
 	useSetProductActive,
