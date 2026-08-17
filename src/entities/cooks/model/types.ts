@@ -78,3 +78,24 @@ export interface Cook {
 	createdAt: string;
 	updatedAt: string;
 }
+
+export interface CookDashboardProductDto {
+	id: string;
+	name: string;
+	stock: number;
+	isAvailable: boolean;
+	availability: "available" | "made_to_order";
+}
+
+/**
+ * The API doesn't document a response schema for GET /api/cooks/me/dashboard;
+ * verified against a real response on 2026-08-17.
+ */
+export interface CookDashboardResponseDto {
+	cookId: string;
+	pendingOrders: number;
+	ordersBeingPrepared: number;
+	shippedOrders: number;
+	monthlySales: number;
+	products: CookDashboardProductDto[];
+}

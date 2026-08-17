@@ -1,4 +1,9 @@
-import { ClipboardList, type LucideIcon, Package } from "lucide-react";
+import {
+	ClipboardList,
+	LayoutDashboard,
+	type LucideIcon,
+	Package,
+} from "lucide-react";
 
 export interface CookNavLink {
 	to: string;
@@ -8,6 +13,7 @@ export interface CookNavLink {
 }
 
 export const COOK_NAV_LINKS: CookNavLink[] = [
-	{ to: "/orders", label: "Pedidos", icon: ClipboardList, end: true },
+	{ to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true },
+	{ to: "/orders", label: "Pedidos", icon: ClipboardList },
 	{ to: "/products", label: "Mis productos", icon: Package },
 ];

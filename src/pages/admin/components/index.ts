@@ -7,6 +7,5 @@ export { AdminMenuSheet } from "./menu-sheet";
 export { AdminNavbar } from "./navbar";
 export { OrderRow, OrderRowSkeleton } from "./order-row";
 export { AdminSidebar } from "./sidebar";
-export { StatCard, StatCardSkeleton } from "./stat-card";
 export { TagFormDialog } from "./tag-form-dialog";
 export { TagRow, TagRowSkeleton } from "./tag-row";

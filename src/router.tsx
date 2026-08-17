@@ -23,6 +23,7 @@ import {
 } from "@/pages/auth";
 import {
 	CookCreateProductPage,
+	CookDashboardPage,
 	CookEditProductPage,
 	CookLayout,
 	CookOrderDetailPage,
@@ -96,6 +97,7 @@ export const router = createBrowserRouter([
 			</RequireRole>
 		),
 		children: [
+			{ path: "dashboard", element: <CookDashboardPage /> },
 			{ path: "orders", element: <CookOrdersPage /> },
 			{ path: "orders/:id", element: <CookOrderDetailPage /> },
 			{ path: "products", element: <CookProductsPage /> },

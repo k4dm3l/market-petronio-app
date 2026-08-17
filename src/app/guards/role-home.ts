@@ -5,7 +5,7 @@ export function homePathForRole(role: Role | null): string {
 		case Role.Admin:
 			return "/admin/users";
 		case Role.Cook:
-			return "/orders";
+			return "/dashboard";
 		case Role.Customer:
 			return "/search";
 		default:

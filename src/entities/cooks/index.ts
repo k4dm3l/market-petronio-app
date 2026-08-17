@@ -3,12 +3,15 @@ export {
 	useCreateCook,
 	useGetAllCooks,
 	useGetAllCooksInfinite,
+	useGetCookDashboard,
 	useGetCooks,
 	useGetMyCook,
 	useSetCookActive,
 } from "./hooks";
 export type {
 	Cook,
+	CookDashboardProductDto,
+	CookDashboardResponseDto,
 	CookLocationDto,
 	CreateCookDto,
 	FindCooksQuery,

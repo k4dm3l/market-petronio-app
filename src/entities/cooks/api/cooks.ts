@@ -2,6 +2,7 @@ import { http } from "@/shared/lib/http";
 import type { PaginatedResponseDto } from "@/shared/lib/pagination";
 import type {
 	Cook,
+	CookDashboardResponseDto,
 	CreateCookDto,
 	FindCooksQuery,
 	UpdateCookDto,
@@ -25,7 +26,8 @@ export function update(id: string, payload: UpdateCookDto): Promise<Cook> {
 	return http.patch<Cook>(`/api/cooks/${id}`, payload).then((res) => res.data);
 }
 
-// The API doesn't document a response schema for the dashboard summary.
-export function dashboard(): Promise<unknown> {
-	return http.get("/api/cooks/me/dashboard").then((res) => res.data);
+export function dashboard(): Promise<CookDashboardResponseDto> {
+	return http
+		.get<CookDashboardResponseDto>("/api/cooks/me/dashboard")
+		.then((res) => res.data);
 }
