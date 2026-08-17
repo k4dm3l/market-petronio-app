@@ -21,9 +21,11 @@ export function TagRow({ tag }: TagRowProps) {
 				<span className="truncate font-semibold text-foreground">
 					{tag.text}
 				</span>
-				<span className="truncate text-sm text-muted-foreground">
-					Creada el {formatDate(tag.createdAt)}
-				</span>
+				{tag.createdAt && (
+					<span className="truncate text-sm text-muted-foreground">
+						Creada el {formatDate(tag.createdAt)}
+					</span>
+				)}
 			</div>
 		</div>
 	);

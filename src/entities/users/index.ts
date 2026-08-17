@@ -14,6 +14,7 @@ export {
 	useGetCustomers,
 	useGetCustomersInfinite,
 	useGetMe,
+	usePromoteAdmin,
 	useSetCustomerActive,
 	useUpdateAddress,
 	type UploadProfileImageResult,

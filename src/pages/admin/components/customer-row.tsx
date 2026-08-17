@@ -2,12 +2,24 @@ import {
 	ChefHat,
 	MapPinOff,
 	MoreVertical,
+	ShieldCheck,
 	UserRoundCheck,
 	UserRoundX,
 } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router";
 import type { UserMeResponseDto } from "@/entities/users";
-import { useSetCustomerActive } from "@/entities/users";
+import { usePromoteAdmin, useSetCustomerActive } from "@/entities/users";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "@/shared/components/ui/alert-dialog";
 import {
 	Avatar,
 	AvatarFallback,
@@ -38,6 +50,8 @@ interface CustomerRowProps {
 
 export function CustomerRow({ customer }: CustomerRowProps) {
 	const { mutate, isPending } = useSetCustomerActive();
+	const { mutate: promote, isPending: isPromoting } = usePromoteAdmin();
+	const [promoteOpen, setPromoteOpen] = useState(false);
 	const address = customer.deliveryInformation?.address;
 
 	return (
@@ -93,7 +107,7 @@ export function CustomerRow({ customer }: CustomerRowProps) {
 							variant="ghost"
 							size="icon"
 							aria-label={`Acciones para ${customer.name}`}
-							disabled={isPending}
+							disabled={isPending || isPromoting}
 						/>
 					}
 				>
@@ -124,9 +138,43 @@ export function CustomerRow({ customer }: CustomerRowProps) {
 							<ChefHat className="size-5" />
 							Convertir en cocinero
 						</DropdownMenuItem>
+						<DropdownMenuItem onClick={() => setPromoteOpen(true)}>
+							<ShieldCheck className="size-5" />
+							Convertir en administrador
+						</DropdownMenuItem>
 					</DropdownMenuGroup>
 				</DropdownMenuContent>
 			</DropdownMenu>
+
+			<AlertDialog open={promoteOpen} onOpenChange={setPromoteOpen}>
+				<AlertDialogContent className="p-6 sm:max-w-[500px]">
+					<AlertDialogHeader className="grid-rows-1 place-items-start gap-2 text-left sm:place-items-start sm:text-left">
+						<AlertDialogTitle className="text-2xl">
+							Convertir en administrador
+						</AlertDialogTitle>
+						<AlertDialogDescription>
+							¿Estás seguro de que deseas convertir a {customer.name} en
+							administrador? Esta acción le otorgará acceso completo al panel
+							de administración.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter className="-mx-6 -mb-6 p-6">
+						<AlertDialogCancel disabled={isPromoting}>
+							Cancelar
+						</AlertDialogCancel>
+						<AlertDialogAction
+							disabled={isPromoting}
+							onClick={() =>
+								promote(customer.id, {
+									onSuccess: () => setPromoteOpen(false),
+								})
+							}
+						>
+							{isPromoting ? "Convirtiendo..." : "Convertir"}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</div>
 	);
 }

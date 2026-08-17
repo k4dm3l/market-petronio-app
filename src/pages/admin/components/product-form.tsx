@@ -105,11 +105,9 @@ export function ProductForm({ cookId, product, onSuccess }: ProductFormProps) {
 		};
 
 		if (isEditMode && product) {
-			// UpdateProductDto doesn't document an `images` field, but the
-			// backend does accept it — send the full merged list (existing +
-			// newly staged) rather than just the new ones, in case it replaces
-			// the array instead of appending to it. Same item shape as create
-			// ({ id, url, publicId }), not bare ids.
+			// Sending `images` replaces the product's image set, so send the
+			// full merged list (existing + newly staged) rather than just the
+			// new ones.
 			const payload: UpdateProductDto =
 				stagedImages.length > 0
 					? {

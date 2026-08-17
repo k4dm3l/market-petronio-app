@@ -16,10 +16,9 @@ export interface CreateProductDto {
 	minimumOrderQuantity?: number;
 	/**
 	 * Items from POST /products/images (temporary images owned by the
-	 * caller) — same `{ id, url, publicId }` shape as embedded product
-	 * subdocs, sent back in full rather than as bare ids.
+	 * caller) — sent back as `{ id, url, publicId? }` objects, not bare ids.
 	 */
-	images?: ProductImageItemDto[];
+	images?: ProductImagePayloadDto[];
 	/** Must already exist in the global tag catalog (POST /tags). Normalized to lowercase; max 10; unique */
 	tags?: string[];
 	isAvailable?: boolean;
@@ -35,12 +34,11 @@ export interface UpdateProductDto {
 	preparationTimeHours?: number;
 	minimumOrderQuantity?: number;
 	/**
-	 * Not documented in the OpenAPI spec's UpdateProductDto schema, but the
-	 * backend does accept it — same shape as CreateProductDto.images. Send
-	 * the full merged (existing + new) item list, since it's unconfirmed
-	 * whether the backend appends or replaces the product's images array.
+	 * Optional. Omit to keep current images. Same `{ id, url, publicId? }`
+	 * object shape as CreateProductDto.images. Replaces the product's image
+	 * set when provided.
 	 */
-	images?: ProductImageItemDto[];
+	images?: ProductImagePayloadDto[];
 	tags?: string[];
 	isAvailable?: boolean;
 	/** Admin soft-deactivate */
@@ -96,6 +94,13 @@ export interface ProductImageItemDto {
 
 export interface ProductImagesUploadResponseDto {
 	images: ProductImageItemDto[];
+}
+
+/** Shape sent back to the API in CreateProductDto/UpdateProductDto `images`. */
+export interface ProductImagePayloadDto {
+	id: string;
+	url: string;
+	publicId?: string;
 }
 
 /**

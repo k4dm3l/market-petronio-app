@@ -160,7 +160,7 @@ export interface UpdateShippingDto {
 }
 
 export interface FindOrdersQuery {
-	/** Page size (max 50) */
+	/** Page size (1–100) */
 	limit?: number;
 	/** Opaque cursor from the previous page (do not pass customerId) */
 	cursor?: string;

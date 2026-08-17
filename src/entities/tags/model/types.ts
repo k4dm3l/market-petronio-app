@@ -1,8 +1,8 @@
 export interface TagResponseDto {
 	id: string;
 	text: string;
-	createdAt: string;
-	updatedAt: string;
+	createdAt?: string;
+	updatedAt?: string;
 }
 
 export interface CreateTagDto {

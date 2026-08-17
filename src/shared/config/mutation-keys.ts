@@ -48,5 +48,6 @@ export const mutationKeys = {
 		setCookActive: (id: string) => ["admin", "set-cook-active", id] as const,
 		setProductActive: (id: string) =>
 			["admin", "set-product-active", id] as const,
+		promoteAdmin: (id: string) => ["admin", "promote-admin", id] as const,
 	},
 } as const;
