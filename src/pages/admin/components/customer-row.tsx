@@ -154,8 +154,8 @@ export function CustomerRow({ customer }: CustomerRowProps) {
 						</AlertDialogTitle>
 						<AlertDialogDescription>
 							¿Estás seguro de que deseas convertir a {customer.name} en
-							administrador? Esta acción le otorgará acceso completo al panel
-							de administración.
+							administrador? Esta acción le otorgará acceso completo al panel de
+							administración.
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter className="-mx-6 -mb-6 p-6">

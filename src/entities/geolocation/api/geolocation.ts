@@ -19,19 +19,16 @@ export async function searchLocations(
 	if (!trimmed) return [];
 
 	try {
-		const { data } = await locationIq.get<LocationIqSearchResult[]>(
-			"/search",
-			{
-				params: {
-					key: import.meta.env.VITE_GEOLOCATION_API_KEY,
-					q: trimmed,
-					format: "json",
-					// Restricts results to Colombia only.
-					countrycodes: "co",
-					limit: 5,
-				},
+		const { data } = await locationIq.get<LocationIqSearchResult[]>("/search", {
+			params: {
+				key: import.meta.env.VITE_GEOLOCATION_API_KEY,
+				q: trimmed,
+				format: "json",
+				// Restricts results to Colombia only.
+				countrycodes: "co",
+				limit: 5,
 			},
-		);
+		});
 
 		return data.map((result) => ({
 			id: result.place_id,

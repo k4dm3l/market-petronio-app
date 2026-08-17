@@ -217,105 +217,103 @@ export function ProductImageUploadField({
 			{/* Always rendered — even empty — so the row's height is reserved
 			    up front and the page doesn't jump once the first upload lands. */}
 			<div className="flex gap-3 overflow-x-auto pb-1">
-				{slots.length === 0 ? (
-					Array.from({ length: 4 }).map((_, index) => (
-						<div
-							key={index}
-							className={cn(
-								TILE_CLASS,
-								"flex items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 text-muted-foreground/60",
-								index >= 2 && "hidden sm:flex",
-							)}
-						>
-							<ImagePlus className="size-5" />
-						</div>
-					))
-				) : (
-					slots.map((slot, position) => {
-						const isCover = position === 0;
+				{slots.length === 0
+					? Array.from({ length: 4 }).map((_, index) => (
+							<div
+								key={index}
+								className={cn(
+									TILE_CLASS,
+									"flex items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 text-muted-foreground/60",
+									index >= 2 && "hidden sm:flex",
+								)}
+							>
+								<ImagePlus className="size-5" />
+							</div>
+						))
+					: slots.map((slot, position) => {
+							const isCover = position === 0;
 
-						if (slot.kind === "pending") {
-							const { upload } = slot;
+							if (slot.kind === "pending") {
+								const { upload } = slot;
+								return (
+									<div
+										key={`pending-${upload.id}`}
+										className={cn(
+											TILE_CLASS,
+											"relative overflow-hidden rounded-xl border border-border",
+										)}
+									>
+										<img
+											src={upload.previewUrl}
+											alt="Subiendo imagen"
+											className="size-full object-cover"
+										/>
+										<div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-background/85 text-center">
+											{upload.status === "uploading" ? (
+												<Spinner className="size-5" />
+											) : (
+												<>
+													<span className="px-2 text-[11px] font-medium text-destructive">
+														Error al subir
+													</span>
+													<div className="flex gap-1.5">
+														<button
+															type="button"
+															onClick={() => retryUpload(upload)}
+															className="rounded-full bg-background px-2 py-0.5 text-[11px] font-semibold text-foreground ring-1 ring-border hover:bg-muted"
+														>
+															Reintentar
+														</button>
+														<button
+															type="button"
+															onClick={() => dismissPending(upload.id)}
+															aria-label="Quitar imagen"
+															className="flex size-5 items-center justify-center rounded-full bg-background text-foreground ring-1 ring-border hover:bg-muted"
+														>
+															<X className="size-3" />
+														</button>
+													</div>
+												</>
+											)}
+										</div>
+									</div>
+								);
+							}
+
+							const { image } = slot;
 							return (
 								<div
-									key={`pending-${upload.id}`}
+									key={image.id}
 									className={cn(
 										TILE_CLASS,
-										"relative overflow-hidden rounded-xl border border-border",
+										"group relative overflow-hidden rounded-xl border border-border",
 									)}
 								>
 									<img
-										src={upload.previewUrl}
-										alt="Subiendo imagen"
+										src={image.url}
+										alt={`Imagen ${position + 1}`}
 										className="size-full object-cover"
 									/>
-									<div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-background/85 text-center">
-										{upload.status === "uploading" ? (
-											<Spinner className="size-5" />
-										) : (
-											<>
-												<span className="px-2 text-[11px] font-medium text-destructive">
-													Error al subir
-												</span>
-												<div className="flex gap-1.5">
-													<button
-														type="button"
-														onClick={() => retryUpload(upload)}
-														className="rounded-full bg-background px-2 py-0.5 text-[11px] font-semibold text-foreground ring-1 ring-border hover:bg-muted"
-													>
-														Reintentar
-													</button>
-													<button
-														type="button"
-														onClick={() => dismissPending(upload.id)}
-														aria-label="Quitar imagen"
-														className="flex size-5 items-center justify-center rounded-full bg-background text-foreground ring-1 ring-border hover:bg-muted"
-													>
-														<X className="size-3" />
-													</button>
-												</div>
-											</>
-										)}
-									</div>
+									{isCover && (
+										<span className="absolute bottom-2 left-2 rounded-full bg-background/90 px-2 py-0.5 text-[11px] font-semibold text-foreground">
+											Portada
+										</span>
+									)}
+									<button
+										type="button"
+										onClick={() =>
+											slot.kind === "existing"
+												? removeExistingAt(image.id)
+												: removeStagedAt(image.id)
+										}
+										aria-label={`Quitar imagen ${position + 1}`}
+										className="absolute top-2 right-2 flex size-6 items-center justify-center rounded-full bg-background/90 text-foreground opacity-0 transition-opacity group-hover:opacity-100"
+									>
+										<X className="size-3.5" />
+									</button>
 								</div>
 							);
-						}
-
-						const { image } = slot;
-						return (
-							<div
-								key={image.id}
-								className={cn(
-									TILE_CLASS,
-									"group relative overflow-hidden rounded-xl border border-border",
-								)}
-							>
-								<img
-									src={image.url}
-									alt={`Imagen ${position + 1}`}
-									className="size-full object-cover"
-								/>
-								{isCover && (
-									<span className="absolute bottom-2 left-2 rounded-full bg-background/90 px-2 py-0.5 text-[11px] font-semibold text-foreground">
-										Portada
-									</span>
-								)}
-								<button
-									type="button"
-									onClick={() =>
-										slot.kind === "existing"
-											? removeExistingAt(image.id)
-											: removeStagedAt(image.id)
-									}
-									aria-label={`Quitar imagen ${position + 1}`}
-									className="absolute top-2 right-2 flex size-6 items-center justify-center rounded-full bg-background/90 text-foreground opacity-0 transition-opacity group-hover:opacity-100"
-								>
-									<X className="size-3.5" />
-								</button>
-							</div>
-						);
-					})
-				)}
+						})}
 			</div>
 		</div>
 	);

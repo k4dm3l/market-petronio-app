@@ -8,8 +8,8 @@ import { useCreateOrder } from "@/entities/orders";
 import { useGetMe } from "@/entities/users";
 import { AddressFormDialog, type AddressFormValue } from "@/features/address";
 import { Button } from "@/shared/components/ui/button";
-import { formatCurrency } from "@/shared/lib/format";
 import { getErrorMessage } from "@/shared/lib/error";
+import { formatCurrency } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/utils";
 import { CartLineItem, CartSheet, Navbar } from "./components";
 
@@ -59,7 +59,8 @@ export function CustomerCheckoutPage() {
 		return groups;
 	}, [items]);
 
-	const canPlaceOrder = items.length > 0 && delivery !== null && !isPlacingOrder;
+	const canPlaceOrder =
+		items.length > 0 && delivery !== null && !isPlacingOrder;
 
 	const handleAddressSubmit = (value: AddressFormValue) => {
 		setDeliveryOverride({

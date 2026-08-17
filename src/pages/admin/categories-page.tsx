@@ -42,7 +42,9 @@ export function AdminCategoriesPage() {
 	} = useGetAllCategoriesInfinite(query);
 
 	const categories = data?.pages.flatMap((page) => page.data);
-	const activeCount = categories?.filter((category) => category.isActive).length;
+	const activeCount = categories?.filter(
+		(category) => category.isActive,
+	).length;
 
 	return (
 		<div>

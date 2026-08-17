@@ -2,7 +2,7 @@ import { ArrowLeft } from "lucide-react";
 import { Link, useParams } from "react-router";
 import {
 	OrderPaymentStatus,
-	OrderStatus,
+	type OrderStatus,
 	useGetOrder,
 	useUpdateOrderPayment,
 	useUpdateOrderStatus,
@@ -167,7 +167,6 @@ export function CookOrderDetailPage() {
 							{isPaid ? "Marcar como no pagado" : "Marcar como pagado"}
 						</Button>
 					</div>
-
 				</>
 			)}
 		</div>

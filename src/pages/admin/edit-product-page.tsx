@@ -23,7 +23,9 @@ export function AdminEditProductPage() {
 			)}
 
 			{isError && (
-				<p className="text-sm text-destructive">No se pudo cargar el producto.</p>
+				<p className="text-sm text-destructive">
+					No se pudo cargar el producto.
+				</p>
 			)}
 
 			{!isPending && !isError && !product && (
@@ -47,7 +49,9 @@ export function AdminEditProductPage() {
 					<ProductForm
 						cookId={product.cookId}
 						product={product}
-						onSuccess={() => navigate(`/admin/cooks/${product.cookId}/products`)}
+						onSuccess={() =>
+							navigate(`/admin/cooks/${product.cookId}/products`)
+						}
 					/>
 				</>
 			)}

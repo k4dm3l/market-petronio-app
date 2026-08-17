@@ -5,9 +5,7 @@ import { Button } from "@/shared/components/ui/button";
 export function NotFoundPage() {
 	return (
 		<div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background px-4 text-center">
-			<span className="text-8xl font-black text-primary sm:text-9xl">
-				404
-			</span>
+			<span className="text-8xl font-black text-primary sm:text-9xl">404</span>
 
 			<div className="flex flex-col gap-2">
 				<h1 className="text-2xl font-semibold sm:text-3xl">

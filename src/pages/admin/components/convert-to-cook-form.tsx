@@ -16,8 +16,8 @@ import { Input } from "@/shared/components/ui/input";
 import { Separator } from "@/shared/components/ui/separator";
 import { Textarea } from "@/shared/components/ui/textarea";
 import {
-	convertToCookSchema,
 	type ConvertToCookFormValues,
+	convertToCookSchema,
 } from "../schemas/convert-to-cook.schema";
 import { PaymentMethodsField } from "./payment-methods-field";
 import { SpecialtyChipsField } from "./specialty-chips-field";
@@ -27,7 +27,10 @@ interface ConvertToCookFormProps {
 	onSuccess: () => void;
 }
 
-export function ConvertToCookForm({ userId, onSuccess }: ConvertToCookFormProps) {
+export function ConvertToCookForm({
+	userId,
+	onSuccess,
+}: ConvertToCookFormProps) {
 	const { register, handleSubmit, formState, setValue, control } =
 		useForm<ConvertToCookFormValues>({
 			resolver: zodResolver(convertToCookSchema),

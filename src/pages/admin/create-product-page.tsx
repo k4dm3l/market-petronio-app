@@ -24,7 +24,9 @@ export function AdminCreateProductPage() {
 			)}
 
 			{isError && (
-				<p className="text-sm text-destructive">No se pudo cargar el cocinero.</p>
+				<p className="text-sm text-destructive">
+					No se pudo cargar el cocinero.
+				</p>
 			)}
 
 			{!isPending && !isError && !cook && (

@@ -9,13 +9,8 @@ export function useUpdateOrderPayment() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: ({
-			id,
-			payload,
-		}: {
-			id: string;
-			payload: UpdatePaymentDto;
-		}) => updatePayment(id, payload),
+		mutationFn: ({ id, payload }: { id: string; payload: UpdatePaymentDto }) =>
+			updatePayment(id, payload),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.orders.all() });
 		},

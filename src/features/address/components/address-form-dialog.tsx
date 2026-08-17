@@ -19,11 +19,11 @@ import {
 } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
-import {
-	addressFormSchema,
-	type AddressFormSchemaValues,
-} from "../schemas/address-form.schema";
 import type { AddressFormValue } from "../model/types";
+import {
+	type AddressFormSchemaValues,
+	addressFormSchema,
+} from "../schemas/address-form.schema";
 
 interface AddressFormDialogProps {
 	open: boolean;

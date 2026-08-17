@@ -1,6 +1,6 @@
 import { ClipboardList } from "lucide-react";
-import { OrderStatusBadge, PaymentStatusBadge } from "@/features/orders";
 import type { OrderResponseDto } from "@/entities/orders";
+import { OrderStatusBadge, PaymentStatusBadge } from "@/features/orders";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { formatCurrency, formatDate } from "@/shared/lib/format";
 

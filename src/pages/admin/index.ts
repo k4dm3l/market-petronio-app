@@ -1,7 +1,7 @@
 export { AdminLayout } from "./admin-layout";
 export { AdminCategoriesPage } from "./categories-page";
-export { AdminCookProductsPage } from "./cook-products-page";
 export { AdminConvertToCookPage } from "./convert-to-cook-page";
+export { AdminCookProductsPage } from "./cook-products-page";
 export { AdminCooksPage } from "./cooks-page";
 export { AdminCreateProductPage } from "./create-product-page";
 export { AdminCustomersPage } from "./customers-page";

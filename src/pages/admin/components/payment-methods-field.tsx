@@ -1,6 +1,14 @@
 import { Plus, Trash2 } from "lucide-react";
-import { Controller, type Control, useFieldArray, useWatch } from "react-hook-form";
-import { PAYMENT_METHOD_OPTIONS, type PaymentMethodCategory } from "@/entities/cooks";
+import {
+	type Control,
+	Controller,
+	useFieldArray,
+	useWatch,
+} from "react-hook-form";
+import {
+	PAYMENT_METHOD_OPTIONS,
+	type PaymentMethodCategory,
+} from "@/entities/cooks";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import {
@@ -33,7 +41,9 @@ type PaymentMethodOption = (typeof PAYMENT_METHOD_OPTIONS)[number];
 const GROUPED_OPTIONS = PAYMENT_METHOD_OPTIONS.reduce<
 	Partial<Record<PaymentMethodCategory, PaymentMethodOption[]>>
 >((acc, option) => {
-	(acc[option.category] ??= []).push(option);
+	const group = acc[option.category] ?? [];
+	group.push(option);
+	acc[option.category] = group;
 	return acc;
 }, {});
 
@@ -45,8 +55,9 @@ interface PaymentMethodRowProps {
 
 function PaymentMethodRow({ control, index, onRemove }: PaymentMethodRowProps) {
 	const type = useWatch({ control, name: `paymentMethods.${index}.type` });
-	const category = PAYMENT_METHOD_OPTIONS.find((option) => option.id === type)
-		?.category;
+	const category = PAYMENT_METHOD_OPTIONS.find(
+		(option) => option.id === type,
+	)?.category;
 	const placeholder = category
 		? CATEGORY_DETAILS_PLACEHOLDER[category]
 		: "Detalles";
@@ -147,7 +158,9 @@ export function PaymentMethodsField({ control }: PaymentMethodsFieldProps) {
 					type="button"
 					variant="link"
 					className="h-auto p-0"
-					onClick={() => append({ type: "nequi", details: "", isEnabled: true })}
+					onClick={() =>
+						append({ type: "nequi", details: "", isEnabled: true })
+					}
 				>
 					<Plus className="size-4" />
 					Agregar método

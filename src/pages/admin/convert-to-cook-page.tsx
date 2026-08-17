@@ -24,7 +24,9 @@ export function AdminConvertToCookPage() {
 			)}
 
 			{isError && (
-				<p className="text-sm text-destructive">No se pudo cargar el cliente.</p>
+				<p className="text-sm text-destructive">
+					No se pudo cargar el cliente.
+				</p>
 			)}
 
 			{!isPending && !isError && !customer && (

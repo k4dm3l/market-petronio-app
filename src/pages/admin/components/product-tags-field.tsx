@@ -77,7 +77,10 @@ export function ProductTagsField({
 				{value.map((tag) => (
 					<span
 						key={tag}
-						className={cn(badgeVariants({ variant: "secondary" }), "h-7 gap-1.5 px-2.5 text-sm")}
+						className={cn(
+							badgeVariants({ variant: "secondary" }),
+							"h-7 gap-1.5 px-2.5 text-sm",
+						)}
 					>
 						{tag}
 						<button
@@ -102,11 +105,17 @@ export function ProductTagsField({
 						if (event.key === "Enter") {
 							event.preventDefault();
 							if (suggestions.length > 0) addTag(suggestions[activeIndex].text);
-						} else if (event.key === "Backspace" && query === "" && value.length > 0) {
+						} else if (
+							event.key === "Backspace" &&
+							query === "" &&
+							value.length > 0
+						) {
 							removeTag(value[value.length - 1]);
 						} else if (event.key === "ArrowDown") {
 							event.preventDefault();
-							setHighlightedIndex((i) => Math.min(i + 1, suggestions.length - 1));
+							setHighlightedIndex((i) =>
+								Math.min(i + 1, suggestions.length - 1),
+							);
 						} else if (event.key === "ArrowUp") {
 							event.preventDefault();
 							setHighlightedIndex((i) => Math.max(i - 1, 0));
@@ -114,7 +123,9 @@ export function ProductTagsField({
 							setOpen(false);
 						}
 					}}
-					placeholder={atLimit ? `Máximo ${MAX_TAGS} etiquetas` : "Buscar etiqueta..."}
+					placeholder={
+						atLimit ? `Máximo ${MAX_TAGS} etiquetas` : "Buscar etiqueta..."
+					}
 					disabled={atLimit}
 					autoComplete="off"
 					className="h-7 min-w-32 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed md:text-sm"

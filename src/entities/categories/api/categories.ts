@@ -1,5 +1,5 @@
-import type { PaginatedResponseDto } from "@/shared/lib/pagination";
 import { http } from "@/shared/lib/http";
+import type { PaginatedResponseDto } from "@/shared/lib/pagination";
 import type {
 	Category,
 	CreateCategoryDto,
@@ -7,9 +7,7 @@ import type {
 	UpdateCategoryDto,
 } from "../model/types";
 
-export function findAll(
-	query: FindCategoriesQuery = {},
-): Promise<Category[]> {
+export function findAll(query: FindCategoriesQuery = {}): Promise<Category[]> {
 	return http
 		.get<PaginatedResponseDto<Category>>("/api/categories", { params: query })
 		.then((res) => res.data.data);

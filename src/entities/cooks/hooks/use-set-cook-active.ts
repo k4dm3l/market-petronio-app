@@ -13,7 +13,9 @@ export function useSetCookActive() {
 			setCookActive(id, payload),
 		onSuccess: (cook) => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.cooks.listAdmin() });
-			toast.success(cook.isActive ? "Cocinero activado" : "Cocinero desactivado");
+			toast.success(
+				cook.isActive ? "Cocinero activado" : "Cocinero desactivado",
+			);
 		},
 		onError: (error) => {
 			toast.error(getErrorMessage(error));

@@ -5,17 +5,10 @@ import { useGetAllProductsInfinite } from "@/entities/products";
 import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
 import { Spinner } from "@/shared/components/ui/spinner";
-import {
-	AdminListHeader,
-	ProductRow,
-	ProductRowSkeleton,
-} from "./components";
+import { AdminListHeader, ProductRow, ProductRowSkeleton } from "./components";
 
 function normalize(value: string) {
-	return value
-		.toLowerCase()
-		.normalize("NFD")
-		.replace(/[̀-ͯ]/g, "");
+	return value.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 }
 
 export function AdminProductsPage() {

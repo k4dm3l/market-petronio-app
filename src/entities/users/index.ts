@@ -8,6 +8,7 @@ export {
 	upsertDeliveryInformation,
 } from "./api/users";
 export {
+	type UploadProfileImageResult,
 	useAddAddress,
 	useDeleteAddress,
 	useDeleteProfileImage,
@@ -17,7 +18,6 @@ export {
 	usePromoteAdmin,
 	useSetCustomerActive,
 	useUpdateAddress,
-	type UploadProfileImageResult,
 	useUploadProfileImages,
 } from "./hooks";
 export type {

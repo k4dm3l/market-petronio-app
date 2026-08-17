@@ -22,8 +22,8 @@ import {
 } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
 import {
-	createTagSchema,
 	type CreateTagFormValues,
+	createTagSchema,
 } from "../schemas/create-tag.schema";
 
 export function TagFormDialog() {

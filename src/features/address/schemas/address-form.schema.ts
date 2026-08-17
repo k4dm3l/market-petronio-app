@@ -6,8 +6,12 @@ export const addressFormSchema = z.object({
 	// location sits at exactly (0, 0), and it keeps this a plain `number`
 	// instead of `number | null` (avoids nullable+refine narrowing quirks
 	// with zodResolver's inferred type). Mirrors convert-to-cook.schema.ts.
-	latitude: z.number().refine((v) => v !== 0, "Selecciona una dirección de la lista"),
-	longitude: z.number().refine((v) => v !== 0, "Selecciona una dirección de la lista"),
+	latitude: z
+		.number()
+		.refine((v) => v !== 0, "Selecciona una dirección de la lista"),
+	longitude: z
+		.number()
+		.refine((v) => v !== 0, "Selecciona una dirección de la lista"),
 	additionalInformation: z.string().optional(),
 });
 

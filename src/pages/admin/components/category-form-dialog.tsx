@@ -23,8 +23,8 @@ import {
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
 import {
-	createCategorySchema,
 	type CreateCategoryFormValues,
+	createCategorySchema,
 } from "../schemas/create-category.schema";
 
 export function CategoryFormDialog() {

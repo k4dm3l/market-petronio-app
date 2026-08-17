@@ -19,7 +19,11 @@ http.interceptors.request.use((config) => {
 // credentials on login/register aren't an expired-token situation, and the
 // refresh call itself must not try to refresh on its own failure.
 const REFRESH_PATH = "/api/auth/refresh";
-const NO_REFRESH_PATHS = ["/api/auth/login", "/api/auth/register", REFRESH_PATH];
+const NO_REFRESH_PATHS = [
+	"/api/auth/login",
+	"/api/auth/register",
+	REFRESH_PATH,
+];
 
 interface RetryableConfig extends InternalAxiosRequestConfig {
 	_retry?: boolean;

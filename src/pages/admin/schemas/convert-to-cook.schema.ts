@@ -20,8 +20,12 @@ export const convertToCookSchema = z.object({
 	// location sits at exactly (0, 0), and it keeps this a plain `number`
 	// instead of `number | null` (avoids nullable+refine narrowing quirks
 	// with zodResolver's inferred type).
-	latitude: z.number().refine((v) => v !== 0, "Selecciona una ubicación de la lista"),
-	longitude: z.number().refine((v) => v !== 0, "Selecciona una ubicación de la lista"),
+	latitude: z
+		.number()
+		.refine((v) => v !== 0, "Selecciona una ubicación de la lista"),
+	longitude: z
+		.number()
+		.refine((v) => v !== 0, "Selecciona una ubicación de la lista"),
 	paymentMethods: z
 		.array(paymentMethodSchema)
 		.min(1, "Agrega al menos un método de pago"),

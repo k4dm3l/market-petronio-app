@@ -4,7 +4,9 @@ export const queryKeys = {
 		// Called with no args, this is a prefix — `invalidateQueries` matches it
 		// against every cached search-term variant below it (exact: false).
 		customers: (params?: Record<string, unknown>) =>
-			params ? (["users", "customers", params] as const) : (["users", "customers"] as const),
+			params
+				? (["users", "customers", params] as const)
+				: (["users", "customers"] as const),
 		// Nested under the same "customers" prefix so invalidating
 		// `customers()` (no args) also invalidates this infinite-scroll cache.
 		customersInfinite: (params?: Record<string, unknown>) =>
@@ -80,7 +82,8 @@ export const queryKeys = {
 		// A bare top-level prefix — `invalidateQueries` against this matches
 		// every cached variant below it (list and listInfinite alike).
 		all: () => ["tags"] as const,
-		list: (params?: Record<string, unknown>) => ["tags", "list", params] as const,
+		list: (params?: Record<string, unknown>) =>
+			["tags", "list", params] as const,
 		listInfinite: (params?: Record<string, unknown>) =>
 			["tags", "list-infinite", params] as const,
 	},

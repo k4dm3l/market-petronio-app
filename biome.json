@@ -18,6 +18,9 @@
 			"preset": "recommended",
 			"a11y": {
 				"noAmbiguousAnchorText": "off"
+			},
+			"suspicious": {
+				"noArrayIndexKey": "off"
 			}
 		}
 	},

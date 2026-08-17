@@ -1,6 +1,10 @@
-import type { PaginatedResponseDto } from "@/shared/lib/pagination";
 import { http } from "@/shared/lib/http";
-import type { CreateTagDto, FindTagsQuery, TagResponseDto } from "../model/types";
+import type { PaginatedResponseDto } from "@/shared/lib/pagination";
+import type {
+	CreateTagDto,
+	FindTagsQuery,
+	TagResponseDto,
+} from "../model/types";
 
 /** Full paginated envelope — for infinite-scroll consumers that need `pagination`. */
 export function findAllPage(
@@ -17,5 +21,7 @@ export function findAll(query: FindTagsQuery = {}): Promise<TagResponseDto[]> {
 
 /** Idempotent — safe to call even if the tag already exists. */
 export function create(payload: CreateTagDto): Promise<TagResponseDto> {
-	return http.post<TagResponseDto>("/api/tags", payload).then((res) => res.data);
+	return http
+		.post<TagResponseDto>("/api/tags", payload)
+		.then((res) => res.data);
 }

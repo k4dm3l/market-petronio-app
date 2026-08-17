@@ -1,5 +1,5 @@
-import type { PaginatedResponseDto } from "@/shared/lib/pagination";
 import { http } from "@/shared/lib/http";
+import type { PaginatedResponseDto } from "@/shared/lib/pagination";
 import type {
 	Cook,
 	CreateCookDto,

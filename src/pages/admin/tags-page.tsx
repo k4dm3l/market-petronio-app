@@ -6,7 +6,12 @@ import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { useDebouncedValue } from "@/shared/hooks";
-import { AdminListHeader, TagFormDialog, TagRow, TagRowSkeleton } from "./components";
+import {
+	AdminListHeader,
+	TagFormDialog,
+	TagRow,
+	TagRowSkeleton,
+} from "./components";
 
 export function AdminTagsPage() {
 	const [searchParams, setSearchParams] = useSearchParams();

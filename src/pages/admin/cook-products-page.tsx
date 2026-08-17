@@ -6,17 +6,10 @@ import { useGetAllProductsInfinite } from "@/entities/products";
 import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
 import { Spinner } from "@/shared/components/ui/spinner";
-import {
-	AdminListHeader,
-	ProductRow,
-	ProductRowSkeleton,
-} from "./components";
+import { AdminListHeader, ProductRow, ProductRowSkeleton } from "./components";
 
 function normalize(value: string) {
-	return value
-		.toLowerCase()
-		.normalize("NFD")
-		.replace(/[̀-ͯ]/g, "");
+	return value.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 }
 
 export function AdminCookProductsPage() {
@@ -25,8 +18,11 @@ export function AdminCookProductsPage() {
 	// so this stays local state rather than syncing to the URL.
 	const [query, setQuery] = useState("");
 
-	const { data: cooks, isPending: isCooksPending, isError: isCooksError } =
-		useGetAllCooks();
+	const {
+		data: cooks,
+		isPending: isCooksPending,
+		isError: isCooksError,
+	} = useGetAllCooks();
 	const {
 		data,
 		isPending: isProductsPending,
@@ -45,7 +41,9 @@ export function AdminCookProductsPage() {
 	// client-side over whatever pages have been loaded so far.
 	const filtered = useMemo(() => {
 		if (!products || !cook) return [];
-		const cookProducts = products.filter((product) => product.cookId === cook.id);
+		const cookProducts = products.filter(
+			(product) => product.cookId === cook.id,
+		);
 		const q = normalize(query.trim());
 		if (!q) return cookProducts;
 		return cookProducts.filter((product) =>

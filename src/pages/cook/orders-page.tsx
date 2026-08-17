@@ -3,7 +3,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import type { OrderStatus } from "@/entities/orders";
 import { useGetOrders } from "@/entities/orders";
-import { ORDER_STATUS_META, OrderStatusBadge, PaymentStatusBadge } from "@/features/orders";
+import {
+	ORDER_STATUS_META,
+	OrderStatusBadge,
+	PaymentStatusBadge,
+} from "@/features/orders";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { useDebouncedValue } from "@/shared/hooks";
@@ -19,10 +23,7 @@ const STATUS_FILTERS: { value: OrderStatus | "all"; label: string }[] = [
 ];
 
 function normalize(value: string) {
-	return value
-		.toLowerCase()
-		.normalize("NFD")
-		.replace(/[̀-ͯ]/g, "");
+	return value.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 }
 
 export function CookOrdersPage() {
