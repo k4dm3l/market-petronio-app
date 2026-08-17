@@ -1,30 +1,12 @@
 import { ChefHat } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useGetAllCooks } from "@/entities/cooks";
 import { Separator } from "@/shared/components/ui/separator";
 import { AdminListHeader, CookRow, CookRowSkeleton } from "./components";
 
-function normalize(value: string) {
-	return value
-		.toLowerCase()
-		.normalize("NFD")
-		.replace(/[̀-ͯ]/g, "");
-}
-
 export function AdminCooksPage() {
-	const { data, isPending, isError } = useGetAllCooks();
 	const [query, setQuery] = useState("");
-
-	const filtered = useMemo(() => {
-		if (!data) return [];
-		const q = normalize(query.trim());
-		if (!q) return data;
-		return data.filter((cook) =>
-			[cook.displayName, cook.publicLocation, ...cook.specialties]
-				.filter((value): value is string => Boolean(value))
-				.some((value) => normalize(value).includes(q)),
-		);
-	}, [data, query]);
+	const { data, isPending, isError } = useGetAllCooks(query);
 
 	const activeCount = data?.filter((cook) => cook.isActive).length;
 
@@ -60,9 +42,9 @@ export function AdminCooksPage() {
 				</div>
 			)}
 
-			{data !== undefined && filtered.length > 0 && (
+			{data !== undefined && data.length > 0 && (
 				<div className="overflow-hidden rounded-2xl border border-border bg-card">
-					{filtered.map((cook, index) => (
+					{data.map((cook, index) => (
 						<div key={cook.id}>
 							{index > 0 && <Separator />}
 							<CookRow cook={cook} />
@@ -71,7 +53,7 @@ export function AdminCooksPage() {
 				</div>
 			)}
 
-			{data !== undefined && filtered.length === 0 && (
+			{data !== undefined && data.length === 0 && (
 				<div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
 					<div className="flex size-11 items-center justify-center rounded-xl bg-muted text-muted-foreground">
 						<ChefHat className="size-5" />

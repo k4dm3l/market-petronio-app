@@ -164,4 +164,6 @@ export interface FindOrdersQuery {
 	limit?: number;
 	/** Opaque cursor from the previous page (do not pass customerId) */
 	cursor?: string;
+	status?: OrderStatus;
+	search?: string;
 }

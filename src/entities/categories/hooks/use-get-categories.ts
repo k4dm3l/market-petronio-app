@@ -5,6 +5,6 @@ import { findAll } from "../api/categories";
 export function useGetCategories() {
 	return useQuery({
 		queryKey: queryKeys.categories.list(),
-		queryFn: findAll,
+		queryFn: () => findAll(),
 	});
 }

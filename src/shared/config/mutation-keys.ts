@@ -10,6 +10,11 @@ export const mutationKeys = {
 			["users", "upsert-delivery-information"] as const,
 		uploadProfileImages: () => ["users", "upload-profile-images"] as const,
 		deleteProfileImage: () => ["users", "delete-profile-image"] as const,
+		addAddress: () => ["users", "add-address"] as const,
+		updateAddress: (addressId: string) =>
+			["users", "update-address", addressId] as const,
+		deleteAddress: (addressId: string) =>
+			["users", "delete-address", addressId] as const,
 	},
 	cooks: {
 		create: () => ["cooks", "create"] as const,
@@ -19,10 +24,15 @@ export const mutationKeys = {
 		create: () => ["products", "create"] as const,
 		update: (id: string) => ["products", "update", id] as const,
 		remove: (id: string) => ["products", "remove", id] as const,
+		uploadImage: () => ["products", "upload-image"] as const,
+		removeImage: () => ["products", "remove-image"] as const,
 	},
 	categories: {
 		create: () => ["categories", "create"] as const,
 		update: (id: string) => ["categories", "update", id] as const,
+	},
+	tags: {
+		create: () => ["tags", "create"] as const,
 	},
 	orders: {
 		create: () => ["orders", "create"] as const,

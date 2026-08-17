@@ -4,11 +4,20 @@ import type { OrderResponseDto } from "@/entities/orders";
 import type { Product } from "@/entities/products";
 import type { UserMeResponseDto } from "@/entities/users";
 import { http } from "@/shared/lib/http";
-import type { PaginatedResponseDto, SetActiveDto } from "../model/types";
+import type {
+	AdminOrdersQuery,
+	AdminSearchQuery,
+	PaginatedResponseDto,
+	SetActiveDto,
+} from "../model/types";
 
-export function listCustomers(): Promise<UserMeResponseDto[]> {
+export function listCustomers(
+	query: AdminSearchQuery = {},
+): Promise<UserMeResponseDto[]> {
 	return http
-		.get<PaginatedResponseDto<UserMeResponseDto>>("/api/admin/customers")
+		.get<PaginatedResponseDto<UserMeResponseDto>>("/api/admin/customers", {
+			params: query,
+		})
 		.then((res) => res.data.data);
 }
 
@@ -21,9 +30,9 @@ export function setCustomerActive(
 		.then((res) => res.data);
 }
 
-export function listCooks(): Promise<Cook[]> {
+export function listCooks(query: AdminSearchQuery = {}): Promise<Cook[]> {
 	return http
-		.get<PaginatedResponseDto<Cook>>("/api/admin/cooks")
+		.get<PaginatedResponseDto<Cook>>("/api/admin/cooks", { params: query })
 		.then((res) => res.data.data);
 }
 
@@ -36,6 +45,9 @@ export function setCookActive(
 		.then((res) => res.data);
 }
 
+// No `search` param on this one — GET /api/admin/products only takes
+// limit/cursor per the API spec, so the admin products page still filters
+// client-side.
 export function listProducts(): Promise<Product[]> {
 	return http
 		.get<PaginatedResponseDto<Product>>("/api/admin/products")
@@ -51,14 +63,22 @@ export function setProductActive(
 		.then((res) => res.data);
 }
 
-export function listOrders(): Promise<OrderResponseDto[]> {
+export function listOrders(
+	query: AdminOrdersQuery = {},
+): Promise<OrderResponseDto[]> {
 	return http
-		.get<PaginatedResponseDto<OrderResponseDto>>("/api/admin/orders")
+		.get<PaginatedResponseDto<OrderResponseDto>>("/api/admin/orders", {
+			params: query,
+		})
 		.then((res) => res.data.data);
 }
 
-export function listCategories(): Promise<Category[]> {
+export function listCategories(
+	query: AdminSearchQuery = {},
+): Promise<Category[]> {
 	return http
-		.get<PaginatedResponseDto<Category>>("/api/admin/categories")
+		.get<PaginatedResponseDto<Category>>("/api/admin/categories", {
+			params: query,
+		})
 		.then((res) => res.data.data);
 }

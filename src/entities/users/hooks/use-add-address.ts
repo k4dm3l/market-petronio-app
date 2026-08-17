@@ -2,18 +2,18 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { mutationKeys, queryKeys } from "@/shared/config";
 import { getErrorMessage } from "@/shared/lib/error";
-import { removeImage } from "../api/products";
+import { addAddress } from "../api/users";
+import type { CreateAddressDto } from "../model/types";
 
-export function useRemoveProductImage() {
+export function useAddAddress() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationKey: mutationKeys.products.removeImage(),
-		mutationFn: (imageId: string) => removeImage(imageId),
+		mutationKey: mutationKeys.users.addAddress(),
+		mutationFn: (payload: CreateAddressDto) => addAddress(payload),
 		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.products.listAdmin(),
-			});
+			queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
+			toast.success("Dirección agregada");
 		},
 		onError: (error) => {
 			toast.error(getErrorMessage(error));

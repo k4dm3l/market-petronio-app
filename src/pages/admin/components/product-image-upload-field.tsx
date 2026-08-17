@@ -1,33 +1,15 @@
 import { ImagePlus, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
-import { useUploadProductImage } from "@/entities/products";
+import type { ProductImageItemDto } from "@/entities/products";
+import { useRemoveProductImage, useUploadProductImage } from "@/entities/products";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { getErrorMessage } from "@/shared/lib/error";
 import { cn } from "@/shared/lib/utils";
 
 const MAX_IMAGES = 5;
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
-
-interface ExistingProductImage {
-	id: string;
-	url: string;
-}
-
-interface ProductImageUploadFieldProps {
-	/**
-	 * Product being edited. When present, dropped files upload immediately to
-	 * `POST /api/products/:id/images`. When absent — creating a product that
-	 * doesn't exist yet — files are staged via `newFiles`/`onNewFilesChange`
-	 * for the caller to upload once the product has been created.
-	 */
-	productId?: string;
-	existingImages?: ExistingProductImage[];
-	onRemoveExisting?: (imageId: string) => void;
-	newFiles: File[];
-	onNewFilesChange: (files: File[]) => void;
-}
 
 interface PendingUpload {
 	id: string;
@@ -37,10 +19,19 @@ interface PendingUpload {
 	error?: string;
 }
 
-type Slot =
-	| { kind: "existing"; id: string; url: string }
-	| { kind: "staged"; index: number; url: string }
-	| { kind: "pending"; upload: PendingUpload };
+interface ProductImageUploadFieldProps {
+	/** Product's persisted images (edit mode). Removable. */
+	existingImages?: ProductImageItemDto[];
+	/** Newly uploaded temp images (from POST /products/images), staged for CreateProductDto.images. */
+	value: ProductImageItemDto[];
+	onChange: (next: ProductImageItemDto[]) => void;
+	/**
+	 * false in edit mode — UpdateProductDto has no `images` field, so a new
+	 * image can't be attached to a product that already exists. Only
+	 * removing existing images is possible then.
+	 */
+	canAddImages?: boolean;
+}
 
 function rejectionMessage(
 	fileName: string,
@@ -59,46 +50,23 @@ function rejectionMessage(
 }
 
 export function ProductImageUploadField({
-	productId,
 	existingImages = [],
-	onRemoveExisting,
-	newFiles,
-	onNewFilesChange,
+	value,
+	onChange,
+	canAddImages = true,
 }: ProductImageUploadFieldProps) {
 	const uploadProductImage = useUploadProductImage();
+	const removeStagedImage = useRemoveProductImage();
+	const removeExistingImage = useRemoveProductImage();
 	const [pending, setPending] = useState<PendingUpload[]>([]);
-	// Images uploaded during this session that `existingImages` (owned by the
-	// parent's product query) hasn't caught up with yet after the refetch.
-	const [uploaded, setUploaded] = useState<ExistingProductImage[]>([]);
-	// Files show as "uploading" the moment they're dropped, but the actual
-	// requests run one at a time — firing them concurrently races the
-	// server's read-modify-write on the product's images array and can leave
-	// a request hanging forever.
-	const uploadQueueRef = useRef(Promise.resolve());
+	// tempIds dismissed while their upload was still in flight — when the
+	// request settles we just clean up instead of reviving the preview.
+	const dismissedRef = useRef<Set<string>>(new Set());
 
-	const stagedPreviews = useMemo(
-		() => newFiles.map((file) => URL.createObjectURL(file)),
-		[newFiles],
-	);
-
-	useEffect(() => {
-		return () => {
-			for (const url of stagedPreviews) URL.revokeObjectURL(url);
-		};
-	}, [stagedPreviews]);
-
-	const optimisticUploaded = uploaded.filter(
-		(image) => !existingImages.some((existing) => existing.id === image.id),
-	);
-
-	const totalCount =
-		existingImages.length +
-		optimisticUploaded.length +
-		newFiles.length +
-		pending.length;
+	const totalCount = existingImages.length + value.length + pending.length;
 	const remainingSlots = Math.max(0, MAX_IMAGES - totalCount);
 
-	const uploadNow = (targetProductId: string, file: File) => {
+	const uploadOne = (file: File) => {
 		const tempId = crypto.randomUUID();
 		const previewUrl = URL.createObjectURL(file);
 		setPending((prev) => [
@@ -106,16 +74,23 @@ export function ProductImageUploadField({
 			{ id: tempId, file, previewUrl, status: "uploading" },
 		]);
 
-		uploadQueueRef.current = uploadQueueRef.current.then(async () => {
-			try {
-				const result = await uploadProductImage.mutateAsync({
-					id: targetProductId,
-					file,
-				});
-				setUploaded((prev) => [...prev, { id: result.id, url: result.url }]);
-				setPending((prev) => prev.filter((item) => item.id !== tempId));
+		uploadProductImage.mutate(file, {
+			onSuccess: (result) => {
+				const image = result.images[0];
 				URL.revokeObjectURL(previewUrl);
-			} catch (error) {
+				if (dismissedRef.current.has(tempId)) {
+					dismissedRef.current.delete(tempId);
+					if (image) removeStagedImage.mutate(image.id);
+					return;
+				}
+				setPending((prev) => prev.filter((item) => item.id !== tempId));
+				if (image) onChange([...value, image]);
+			},
+			onError: (error) => {
+				if (dismissedRef.current.has(tempId)) {
+					dismissedRef.current.delete(tempId);
+					return;
+				}
 				setPending((prev) =>
 					prev.map((item) =>
 						item.id === tempId
@@ -123,18 +98,18 @@ export function ProductImageUploadField({
 							: item,
 					),
 				);
-			}
+			},
 		});
 	};
 
 	const retryUpload = (item: PendingUpload) => {
-		if (!productId) return;
 		URL.revokeObjectURL(item.previewUrl);
 		setPending((prev) => prev.filter((p) => p.id !== item.id));
-		uploadNow(productId, item.file);
+		uploadOne(item.file);
 	};
 
 	const dismissPending = (id: string) => {
+		dismissedRef.current.add(id);
 		setPending((prev) => {
 			const item = prev.find((p) => p.id === id);
 			if (item) URL.revokeObjectURL(item.previewUrl);
@@ -148,20 +123,14 @@ export function ProductImageUploadField({
 		if (accepted.length < files.length) {
 			toast.error(`Máximo ${MAX_IMAGES} imágenes por producto`);
 		}
-		if (accepted.length === 0) return;
-
-		if (productId) {
-			for (const file of accepted) uploadNow(productId, file);
-		} else {
-			onNewFilesChange([...newFiles, ...accepted]);
-		}
+		for (const file of accepted) uploadOne(file);
 	};
 
 	const { getRootProps, getInputProps, isDragActive } = useDropzone({
 		accept: { "image/*": [] },
 		maxSize: MAX_SIZE_BYTES,
 		multiple: true,
-		disabled: remainingSlots <= 0,
+		disabled: !canAddImages || remainingSlots <= 0,
 		onDrop: (acceptedFiles, fileRejections) => {
 			addFiles(acceptedFiles);
 			for (const rejection of fileRejections) {
@@ -172,55 +141,49 @@ export function ProductImageUploadField({
 		},
 	});
 
-	const removeStagedAt = (index: number) => {
-		onNewFilesChange(newFiles.filter((_, i) => i !== index));
+	const removeStagedAt = (imageId: string) => {
+		removeStagedImage.mutate(imageId, {
+			onSuccess: () => onChange(value.filter((image) => image.id !== imageId)),
+		});
 	};
 
-	// Existing (already uploaded) images first — the server treats images[0]
-	// as the cover — then locally staged or in-flight files.
-	const slots: Slot[] = [
-		...existingImages.map((image) => ({
-			kind: "existing" as const,
-			id: image.id,
-			url: image.url,
-		})),
-		...optimisticUploaded.map((image) => ({
-			kind: "existing" as const,
-			id: image.id,
-			url: image.url,
-		})),
-		...newFiles.map((_, index) => ({
-			kind: "staged" as const,
-			index,
-			url: stagedPreviews[index],
-		})),
+	const slots = [
+		...existingImages.map((image) => ({ kind: "existing" as const, image })),
+		...value.map((image) => ({ kind: "staged" as const, image })),
 		...pending.map((upload) => ({ kind: "pending" as const, upload })),
 	];
 
 	return (
 		<div className="flex flex-col gap-3">
-			<div
-				{...getRootProps()}
-				className={cn(
-					"flex w-full items-center justify-center gap-4 rounded-xl border border-dashed border-border bg-muted/30 px-6 py-8 text-muted-foreground transition-colors",
-					remainingSlots > 0 && "cursor-pointer hover:bg-muted/50",
-					isDragActive && "border-ring bg-muted/60",
-					remainingSlots <= 0 && "cursor-not-allowed opacity-50",
-				)}
-			>
-				<input {...getInputProps()} />
-				<ImagePlus className="size-7 shrink-0" />
-				<div className="text-left">
-					<p className="text-base font-medium">
-						{remainingSlots <= 0
-							? "Máximo de imágenes alcanzado"
-							: "Arrastrá o hacé click para subir"}
-					</p>
-					<p className="text-sm text-muted-foreground/70">
-						Solo imágenes · máx. {MAX_IMAGES} · 5MB c/u
-					</p>
+			{canAddImages ? (
+				<div
+					{...getRootProps()}
+					className={cn(
+						"flex w-full items-center justify-center gap-4 rounded-xl border border-dashed border-border bg-muted/30 px-6 py-8 text-muted-foreground transition-colors",
+						remainingSlots > 0 && "cursor-pointer hover:bg-muted/50",
+						isDragActive && "border-ring bg-muted/60",
+						remainingSlots <= 0 && "cursor-not-allowed opacity-50",
+					)}
+				>
+					<input {...getInputProps()} />
+					<ImagePlus className="size-7 shrink-0" />
+					<div className="text-left">
+						<p className="text-base font-medium">
+							{remainingSlots <= 0
+								? "Máximo de imágenes alcanzado"
+								: "Arrastrá o hacé click para subir"}
+						</p>
+						<p className="text-sm text-muted-foreground/70">
+							Solo imágenes · máx. {MAX_IMAGES} · 5MB c/u
+						</p>
+					</div>
 				</div>
-			</div>
+			) : (
+				<p className="text-sm text-muted-foreground">
+					Las imágenes solo se pueden agregar al crear el producto. Desde acá
+					podés quitar las existentes.
+				</p>
+			)}
 
 			{slots.length > 0 && (
 				<div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
@@ -271,13 +234,14 @@ export function ProductImageUploadField({
 							);
 						}
 
+						const { image } = slot;
 						return (
 							<div
-								key={slot.kind === "existing" ? slot.id : `staged-${slot.index}`}
+								key={image.id}
 								className="group relative aspect-square overflow-hidden rounded-xl border border-border"
 							>
 								<img
-									src={slot.url}
+									src={image.url}
 									alt={`Imagen ${position + 1}`}
 									className="size-full object-cover"
 								/>
@@ -290,8 +254,8 @@ export function ProductImageUploadField({
 									type="button"
 									onClick={() =>
 										slot.kind === "existing"
-											? onRemoveExisting?.(slot.id)
-											: removeStagedAt(slot.index)
+											? removeExistingImage.mutate(image.id)
+											: removeStagedAt(image.id)
 									}
 									aria-label={`Quitar imagen ${position + 1}`}
 									className="absolute top-2 right-2 flex size-6 items-center justify-center rounded-full bg-background/90 text-foreground opacity-0 transition-opacity group-hover:opacity-100"

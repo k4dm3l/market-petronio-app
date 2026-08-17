@@ -1,7 +1,9 @@
 import { http } from "@/shared/lib/http";
 import type {
+	CreateAddressDto,
 	ImageDeletedResponseDto,
 	ImageUploadResponseDto,
+	UpdateAddressDto,
 	UpsertDeliveryInformationDto,
 	UserMeResponseDto,
 } from "../model/types";
@@ -15,6 +17,29 @@ export function upsertDeliveryInformation(
 ): Promise<UserMeResponseDto> {
 	return http
 		.patch<UserMeResponseDto>("/api/users/me/delivery-information", payload)
+		.then((res) => res.data);
+}
+
+export function addAddress(
+	payload: CreateAddressDto,
+): Promise<UserMeResponseDto> {
+	return http
+		.post<UserMeResponseDto>("/api/users/me/addresses", payload)
+		.then((res) => res.data);
+}
+
+export function updateAddress(
+	addressId: string,
+	payload: UpdateAddressDto,
+): Promise<UserMeResponseDto> {
+	return http
+		.patch<UserMeResponseDto>(`/api/users/me/addresses/${addressId}`, payload)
+		.then((res) => res.data);
+}
+
+export function deleteAddress(addressId: string): Promise<UserMeResponseDto> {
+	return http
+		.delete<UserMeResponseDto>(`/api/users/me/addresses/${addressId}`)
 		.then((res) => res.data);
 }
 

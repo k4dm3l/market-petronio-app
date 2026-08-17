@@ -17,20 +17,12 @@ import type { ConvertToCookFormValues } from "../schemas/convert-to-cook.schema"
 
 const CATEGORY_LABELS: Record<PaymentMethodCategory, string> = {
 	wallet: "Billeteras",
-	bank: "Bancos",
-	bank_transfer: "PSE",
-	card: "Tarjeta",
-	instant_transfer: "Transferencia instantánea",
-	cash: "Efectivo",
+	bank_transfer: "PSE / Transferencia bancaria",
 };
 
 const CATEGORY_DETAILS_PLACEHOLDER: Record<PaymentMethodCategory, string> = {
 	wallet: "Número de celular asociado",
-	bank: "Número de cuenta",
 	bank_transfer: "Correo o documento asociado a PSE",
-	card: "Notas sobre la tarjeta (opcional)",
-	instant_transfer: "Llave Bre-B (celular, correo o documento)",
-	cash: "Nota adicional (opcional)",
 };
 
 const FIELD_LABEL_CLASS =

@@ -14,5 +14,6 @@ export {
 export type {
 	Category,
 	CreateCategoryDto,
+	FindCategoriesQuery,
 	UpdateCategoryDto,
 } from "./model/types";

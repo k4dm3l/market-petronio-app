@@ -1,24 +1,27 @@
 import type { ImageDeletedResponseDto } from "@/entities/users";
+import type { PaginatedResponseDto } from "@/shared/lib/pagination";
 import { http } from "@/shared/lib/http";
 import type {
 	CreateProductDto,
 	FindNearbyProductsQuery,
 	FindProductsQuery,
 	Product,
-	ProductImageUploadResponseDto,
+	ProductImagesUploadResponseDto,
 	UpdateProductDto,
 } from "../model/types";
 
 export function findAll(query: FindProductsQuery = {}): Promise<Product[]> {
 	return http
-		.get<Product[]>("/api/products", { params: query })
-		.then((res) => res.data);
+		.get<PaginatedResponseDto<Product>>("/api/products", { params: query })
+		.then((res) => res.data.data);
 }
 
 export function nearby(query: FindNearbyProductsQuery): Promise<Product[]> {
 	return http
-		.get<Product[]>("/api/products/nearby", { params: query })
-		.then((res) => res.data);
+		.get<PaginatedResponseDto<Product>>("/api/products/nearby", {
+			params: query,
+		})
+		.then((res) => res.data.data);
 }
 
 export function findOne(id: string): Promise<Product> {
@@ -42,23 +45,20 @@ export function remove(id: string): Promise<Product> {
 	return http.delete<Product>(`/api/products/${id}`).then((res) => res.data);
 }
 
-// JPEG/PNG/WEBP, max 5 MB. Owner cook or admin only. Max 5 images per product.
+// JPEG/PNG/WEBP, max 5 MB. Not tied to a product — returns temporary image(s)
+// owned by the caller; pass the returned id(s) as CreateProductDto.images.
 export function uploadImage(
-	id: string,
 	file: File,
-): Promise<ProductImageUploadResponseDto> {
+): Promise<ProductImagesUploadResponseDto> {
 	const formData = new FormData();
 	formData.append("file", file);
 	return http
-		.post<ProductImageUploadResponseDto>(`/api/products/${id}/images`, formData)
+		.post<ProductImagesUploadResponseDto>("/api/products/images", formData)
 		.then((res) => res.data);
 }
 
-export function removeImage(
-	id: string,
-	imageId: string,
-): Promise<ImageDeletedResponseDto> {
+export function removeImage(imageId: string): Promise<ImageDeletedResponseDto> {
 	return http
-		.delete<ImageDeletedResponseDto>(`/api/products/${id}/images/${imageId}`)
+		.delete<ImageDeletedResponseDto>(`/api/products/images/${imageId}`)
 		.then((res) => res.data);
 }

@@ -1,5 +1,5 @@
 import { Tag } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useGetAllCategories } from "@/entities/categories";
 import { Separator } from "@/shared/components/ui/separator";
 import {
@@ -9,27 +9,9 @@ import {
 	CategoryRowSkeleton,
 } from "./components";
 
-function normalize(value: string) {
-	return value
-		.toLowerCase()
-		.normalize("NFD")
-		.replace(/[̀-ͯ]/g, "");
-}
-
 export function AdminCategoriesPage() {
-	const { data, isPending, isError } = useGetAllCategories();
 	const [query, setQuery] = useState("");
-
-	const filtered = useMemo(() => {
-		if (!data) return [];
-		const q = normalize(query.trim());
-		if (!q) return data;
-		return data.filter((category) =>
-			[category.name, category.description]
-				.filter((value): value is string => Boolean(value))
-				.some((value) => normalize(value).includes(q)),
-		);
-	}, [data, query]);
+	const { data, isPending, isError } = useGetAllCategories(query);
 
 	const activeCount = data?.filter((category) => category.isActive).length;
 
@@ -66,9 +48,9 @@ export function AdminCategoriesPage() {
 				</div>
 			)}
 
-			{data !== undefined && filtered.length > 0 && (
+			{data !== undefined && data.length > 0 && (
 				<div className="overflow-hidden rounded-2xl border border-border bg-card">
-					{filtered.map((category, index) => (
+					{data.map((category, index) => (
 						<div key={category.id}>
 							{index > 0 && <Separator />}
 							<CategoryRow category={category} />
@@ -77,7 +59,7 @@ export function AdminCategoriesPage() {
 				</div>
 			)}
 
-			{data !== undefined && filtered.length === 0 && (
+			{data !== undefined && data.length === 0 && (
 				<div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
 					<div className="flex size-11 items-center justify-center rounded-xl bg-muted text-muted-foreground">
 						<Tag className="size-5" />

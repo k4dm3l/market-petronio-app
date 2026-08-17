@@ -1,5 +1,5 @@
 import { UsersRound } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useGetCustomers } from "@/entities/users";
 import { Separator } from "@/shared/components/ui/separator";
 import {
@@ -8,27 +8,9 @@ import {
 	CustomerRowSkeleton,
 } from "./components";
 
-function normalize(value: string) {
-	return value
-		.toLowerCase()
-		.normalize("NFD")
-		.replace(/[̀-ͯ]/g, "");
-}
-
 export function AdminCustomersPage() {
-	const { data, isPending, isError } = useGetCustomers();
 	const [query, setQuery] = useState("");
-
-	const filtered = useMemo(() => {
-		if (!data) return [];
-		const q = normalize(query.trim());
-		if (!q) return data;
-		return data.filter((customer) =>
-			[customer.name, customer.email, customer.deliveryInformation?.address]
-				.filter((value): value is string => Boolean(value))
-				.some((value) => normalize(value).includes(q)),
-		);
-	}, [data, query]);
+	const { data, isPending, isError } = useGetCustomers(query);
 
 	const activeCount = data?.filter((customer) => customer.isActive).length;
 
@@ -64,9 +46,9 @@ export function AdminCustomersPage() {
 				</div>
 			)}
 
-			{data !== undefined && filtered.length > 0 && (
+			{data !== undefined && data.length > 0 && (
 				<div className="overflow-hidden rounded-2xl border border-border bg-card">
-					{filtered.map((customer, index) => (
+					{data.map((customer, index) => (
 						<div key={customer.id}>
 							{index > 0 && <Separator />}
 							<CustomerRow customer={customer} />
@@ -75,7 +57,7 @@ export function AdminCustomersPage() {
 				</div>
 			)}
 
-			{data !== undefined && filtered.length === 0 && (
+			{data !== undefined && data.length === 0 && (
 				<div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
 					<div className="flex size-11 items-center justify-center rounded-xl bg-muted text-muted-foreground">
 						<UsersRound className="size-5" />

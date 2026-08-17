@@ -11,3 +11,13 @@ export interface PaginatedResponseDto<T> {
 	data: T[];
 	pagination: PaginationDto;
 }
+
+/** GET /api/admin/{customers,cooks,categories} all support this. */
+export interface AdminSearchQuery {
+	search?: string;
+}
+
+/** GET /api/admin/orders additionally supports a status filter. */
+export interface AdminOrdersQuery extends AdminSearchQuery {
+	status?: string;
+}

@@ -14,7 +14,14 @@ export interface CreateProductDto {
 	preparationTimeHours?: number;
 	/** Required minimum when made_to_order */
 	minimumOrderQuantity?: number;
-	/** Normalized to lowercase/hyphenated; max 10; unique */
+	/**
+	 * Ids from POST /products/images (temporary images owned by the caller).
+	 * Embedded on the product as `{ id, url, publicId }` subdocs. There is no
+	 * equivalent field on UpdateProductDto — images can only be attached at
+	 * creation time; afterwards only DELETE /products/images/:imageId works.
+	 */
+	images?: string[];
+	/** Must already exist in the global tag catalog (POST /tags). Normalized to lowercase; max 10; unique */
 	tags?: string[];
 	isAvailable?: boolean;
 }
@@ -35,6 +42,10 @@ export interface UpdateProductDto {
 }
 
 export interface FindProductsQuery {
+	/** Page size (1–100) */
+	limit?: number;
+	/** Opaque cursor from the previous page `pagination.nextCursor` */
+	cursor?: string;
 	/** Case-insensitive name search */
 	search?: string;
 	categoryId?: string;
@@ -54,6 +65,10 @@ export interface FindProductsQuery {
 }
 
 export interface FindNearbyProductsQuery {
+	/** Page size (1–100) */
+	limit?: number;
+	/** Opaque cursor from the previous page `pagination.nextCursor` */
+	cursor?: string;
 	latitude: number;
 	longitude: number;
 	/** Radius in meters */
@@ -65,9 +80,16 @@ export interface FindNearbyProductsQuery {
 	maxPrice?: number;
 }
 
-export interface ProductImageDto {
+export interface ProductImageItemDto {
+	/** Persisted image id — send in CreateProductDto.images */
 	id: string;
 	url: string;
+	/** Provider public id (Cloudinary) */
+	publicId: string;
+}
+
+export interface ProductImagesUploadResponseDto {
+	images: ProductImageItemDto[];
 }
 
 /**
@@ -78,7 +100,7 @@ export interface Product {
 	id: string;
 	name: string;
 	description?: string;
-	images: ProductImageDto[];
+	images: ProductImageItemDto[];
 	price: number;
 	stock?: number;
 	categoryId?: string;
@@ -91,10 +113,4 @@ export interface Product {
 	isActive: boolean;
 	createdAt: string;
 	updatedAt: string;
-}
-
-export interface ProductImageUploadResponseDto {
-	url: string;
-	/** Subdocument id — use with DELETE /products/:id/images/:imageId */
-	id: string;
 }

@@ -1,26 +1,8 @@
 import { z } from "zod";
 
-// Must reflect entities/cooks PAYMENT_METHOD_OPTIONS ids.
+// Must reflect entities/cooks PAYMENT_METHOD_OPTIONS ids (= PaymentMethodDto.type).
 const paymentMethodSchema = z.object({
-	type: z.enum([
-		"pse",
-		"nequi",
-		"daviplata",
-		"bancolombia",
-		"davivienda",
-		"bbva",
-		"banco_de_bogota",
-		"banco_de_occidente",
-		"scotiabank_colpatria",
-		"itau",
-		"banco_agrario",
-		"lulo_bank",
-		"movii",
-		"rappipay",
-		"tarjeta",
-		"bre_b",
-		"efectivo",
-	]),
+	type: z.enum(["nequi", "daviplata", "bank_transfer"]),
 	// "Efectivo" (and similar) don't always have a meaningful detail to fill in,
 	// so this is left unconstrained rather than required.
 	details: z.string(),

@@ -1,21 +1,12 @@
+// Must mirror PaymentMethodDto.type exactly — the API rejects anything else.
 export const PAYMENT_METHOD_OPTIONS = [
-	{ id: "pse", name: "PSE", category: "bank_transfer" },
 	{ id: "nequi", name: "Nequi", category: "wallet" },
 	{ id: "daviplata", name: "DaviPlata", category: "wallet" },
-	{ id: "bancolombia", name: "Bancolombia", category: "bank" },
-	{ id: "davivienda", name: "Davivienda", category: "bank" },
-	{ id: "bbva", name: "BBVA", category: "bank" },
-	{ id: "banco_de_bogota", name: "Banco de Bogotá", category: "bank" },
-	{ id: "banco_de_occidente", name: "Banco de Occidente", category: "bank" },
-	{ id: "scotiabank_colpatria", name: "Scotiabank Colpatria", category: "bank" },
-	{ id: "itau", name: "Itaú", category: "bank" },
-	{ id: "banco_agrario", name: "Banco Agrario", category: "bank" },
-	{ id: "lulo_bank", name: "Lulo Bank", category: "bank" },
-	{ id: "movii", name: "MOVii", category: "wallet" },
-	{ id: "rappipay", name: "RappiPay", category: "wallet" },
-	{ id: "tarjeta", name: "Tarjeta débito/crédito", category: "card" },
-	{ id: "bre_b", name: "Bre-B", category: "instant_transfer" },
-	{ id: "efectivo", name: "Efectivo", category: "cash" },
+	{
+		id: "bank_transfer",
+		name: "PSE / Transferencia bancaria",
+		category: "bank_transfer",
+	},
 ] as const;
 
 export type PaymentMethodType = (typeof PAYMENT_METHOD_OPTIONS)[number]["id"];
@@ -57,6 +48,10 @@ export interface UpdateCookDto {
 }
 
 export interface FindCooksQuery {
+	/** Page size (1–100) */
+	limit?: number;
+	/** Opaque cursor from the previous page `pagination.nextCursor` */
+	cursor?: string;
 	lat?: number;
 	lng?: number;
 	/** Search radius in meters */

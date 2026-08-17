@@ -8,4 +8,8 @@ export {
 	setCustomerActive,
 	setProductActive,
 } from "./api/admin";
-export type { SetActiveDto } from "./model/types";
+export type {
+	AdminOrdersQuery,
+	AdminSearchQuery,
+	SetActiveDto,
+} from "./model/types";

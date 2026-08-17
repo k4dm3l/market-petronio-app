@@ -3,13 +3,14 @@ import { useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { Link } from "react-router";
 import { useGetAllCategories } from "@/entities/categories";
-import type { CreateProductDto, Product, UpdateProductDto } from "@/entities/products";
-import {
-	useCreateProduct,
-	useRemoveProductImage,
-	useUpdateProduct,
-	useUploadProductImage,
+import type {
+	CreateProductDto,
+	Product,
+	ProductImageItemDto,
+	UpdateProductDto,
 } from "@/entities/products";
+import { useCreateProduct, useUpdateProduct } from "@/entities/products";
+import { useCreateTag } from "@/entities/tags";
 import { Button } from "@/shared/components/ui/button";
 import { CurrencyInput } from "@/shared/components/ui/currency-input";
 import {
@@ -77,23 +78,27 @@ export function ProductForm({ cookId, product, onSuccess }: ProductFormProps) {
 		});
 	const createProduct = useCreateProduct();
 	const updateProduct = useUpdateProduct();
-	const uploadProductImage = useUploadProductImage();
-	const removeProductImage = useRemoveProductImage();
+	const createTag = useCreateTag();
 	const { data: categories } = useGetAllCategories();
 
-	const [newImages, setNewImages] = useState<File[]>([]);
-	const [isUploadingImages, setIsUploadingImages] = useState(false);
+	const [stagedImages, setStagedImages] = useState<ProductImageItemDto[]>([]);
+	const [isRegisteringTags, setIsRegisteringTags] = useState(false);
 
 	const availability = useWatch({ control, name: "availability" });
 	const tags = useWatch({ control, name: "tags" });
 
 	const isSubmitting =
-		createProduct.isPending ||
-		updateProduct.isPending ||
-		uploadProductImage.isPending ||
-		isUploadingImages;
+		createProduct.isPending || updateProduct.isPending || isRegisteringTags;
 
-	const onSubmit = handleSubmit((values) => {
+	const onSubmit = handleSubmit(async (values) => {
+		// Tags must already exist in the global catalog — registering is
+		// idempotent, so this is safe even for tags that already exist.
+		setIsRegisteringTags(true);
+		await Promise.allSettled(
+			values.tags.map((text) => createTag.mutateAsync({ text })),
+		);
+		setIsRegisteringTags(false);
+
 		const shared = {
 			name: values.name,
 			description: values.description,
@@ -114,26 +119,17 @@ export function ProductForm({ cookId, product, onSuccess }: ProductFormProps) {
 		};
 
 		if (isEditMode && product) {
-			// Images upload immediately as they're dropped (see
-			// ProductImageUploadField), so there's nothing staged to flush here.
+			// Images can only be attached at creation time (UpdateProductDto has
+			// no `images` field) — the field only allows removing them here.
 			const payload: UpdateProductDto = shared;
 			updateProduct.mutate({ id: product.id, payload }, { onSuccess });
 		} else {
-			// The product doesn't exist yet, so any staged images could only be
-			// added once we have an id — upload them now that it does.
-			const payload: CreateProductDto = { ...shared, cookId };
-			createProduct.mutate(payload, {
-				onSuccess: async (created) => {
-					if (newImages.length > 0) {
-						setIsUploadingImages(true);
-						for (const file of newImages) {
-							await uploadProductImage.mutateAsync({ id: created.id, file });
-						}
-						setIsUploadingImages(false);
-					}
-					onSuccess();
-				},
-			});
+			const payload: CreateProductDto = {
+				...shared,
+				cookId,
+				images: stagedImages.map((image) => image.id),
+			};
+			createProduct.mutate(payload, { onSuccess });
 		}
 	});
 
@@ -142,14 +138,10 @@ export function ProductForm({ cookId, product, onSuccess }: ProductFormProps) {
 			<FieldGroup>
 				<h2 className="text-2xl font-semibold">Imágenes</h2>
 				<ProductImageUploadField
-					productId={product?.id}
 					existingImages={product?.images}
-					onRemoveExisting={(imageId) => {
-						if (!product) return;
-						removeProductImage.mutate({ id: product.id, imageId });
-					}}
-					newFiles={newImages}
-					onNewFilesChange={setNewImages}
+					value={stagedImages}
+					onChange={setStagedImages}
+					canAddImages={!isEditMode}
 				/>
 
 				<Separator />

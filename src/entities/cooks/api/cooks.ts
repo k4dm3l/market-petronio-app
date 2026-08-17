@@ -1,3 +1,4 @@
+import type { PaginatedResponseDto } from "@/shared/lib/pagination";
 import { http } from "@/shared/lib/http";
 import type {
 	Cook,
@@ -8,8 +9,8 @@ import type {
 
 export function findAll(query: FindCooksQuery = {}): Promise<Cook[]> {
 	return http
-		.get<Cook[]>("/api/cooks", { params: query })
-		.then((res) => res.data);
+		.get<PaginatedResponseDto<Cook>>("/api/cooks", { params: query })
+		.then((res) => res.data.data);
 }
 
 export function findOne(id: string): Promise<Cook> {

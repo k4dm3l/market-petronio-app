@@ -22,7 +22,7 @@ export type {
 	FindProductsQuery,
 	Product,
 	ProductAvailability,
-	ProductImageDto,
-	ProductImageUploadResponseDto,
+	ProductImageItemDto,
+	ProductImagesUploadResponseDto,
 	UpdateProductDto,
 } from "./model/types";

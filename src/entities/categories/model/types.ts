@@ -1,3 +1,11 @@
+export interface FindCategoriesQuery {
+	/** Page size (1–100) */
+	limit?: number;
+	/** Opaque cursor from the previous page `pagination.nextCursor` */
+	cursor?: string;
+	search?: string;
+}
+
 export interface CreateCategoryDto {
 	name: string;
 	description?: string;
