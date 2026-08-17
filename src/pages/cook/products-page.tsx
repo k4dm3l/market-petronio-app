@@ -1,8 +1,8 @@
 import { Package, Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
-import { useGetMyCook } from "@/entities/cooks";
 import { useGetProducts, useUpdateProduct } from "@/entities/products";
+import { useAuth } from "@/entities/session";
 import { ProductRow, ProductRowSkeleton } from "@/features/products";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -14,22 +14,17 @@ function normalize(value: string) {
 
 export function CookProductsPage() {
 	const [query, setQuery] = useState("");
-	const {
-		data: cook,
-		isPending: isCookPending,
-		isError: isCookError,
-	} = useGetMyCook();
+	const { cook } = useAuth();
 	const updateProduct = useUpdateProduct();
 
 	const cookId = cook?.id;
 	const {
 		data: products,
 		isPending: isProductsPending,
-		isError: isProductsError,
+		isError,
 	} = useGetProducts({ cookId, limit: 100 }, { enabled: Boolean(cookId) });
 
-	const isPending = isCookPending || (Boolean(cookId) && isProductsPending);
-	const isError = isCookError || (Boolean(cookId) && isProductsError);
+	const isPending = Boolean(cookId) && isProductsPending;
 
 	const filtered = useMemo(() => {
 		const list = products ?? [];

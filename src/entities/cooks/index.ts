@@ -4,8 +4,6 @@ export {
 	useGetAllCooks,
 	useGetAllCooksInfinite,
 	useGetCookDashboard,
-	useGetCooks,
-	useGetMyCook,
 	useSetCookActive,
 } from "./hooks";
 export type {

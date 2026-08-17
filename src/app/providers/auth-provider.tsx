@@ -8,6 +8,7 @@ import {
 	useMemo,
 	useState,
 } from "react";
+import type { Cook } from "@/entities/cooks";
 import {
 	clearSession,
 	readSession,
@@ -23,6 +24,8 @@ interface AuthContextValue {
 	user: User | null;
 	token: string | null;
 	role: Role | null;
+	/** The logged-in user's own cook profile, when `role` is "cook". */
+	cook: Cook | null;
 	signIn: (session: Session) => void;
 	signOut: () => void;
 }
@@ -66,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			user: session?.user ?? null,
 			token: session?.accessToken ?? null,
 			role: session?.user.role ?? null,
+			cook: session?.cook ?? null,
 			signIn,
 			signOut,
 		}),

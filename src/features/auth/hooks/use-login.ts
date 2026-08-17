@@ -15,6 +15,7 @@ export function useLogin() {
 				user: data.user,
 				accessToken: data.accessToken,
 				refreshToken: data.refreshToken,
+				cook: data.cook,
 			});
 		},
 	});

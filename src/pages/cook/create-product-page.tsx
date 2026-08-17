@@ -1,11 +1,11 @@
 import { ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router";
-import { useGetMyCook } from "@/entities/cooks";
+import { useAuth } from "@/entities/session";
 import { ProductForm } from "@/features/products";
 
 export function CookCreateProductPage() {
 	const navigate = useNavigate();
-	const { data: cook, isPending, isError } = useGetMyCook();
+	const { cook } = useAuth();
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -17,15 +17,7 @@ export function CookCreateProductPage() {
 				Volver a productos
 			</Link>
 
-			{isPending && (
-				<p className="text-sm text-muted-foreground">Cargando tu perfil...</p>
-			)}
-
-			{isError && (
-				<p className="text-sm text-destructive">No se pudo cargar tu perfil.</p>
-			)}
-
-			{!isPending && !isError && !cook && (
+			{!cook && (
 				<p className="text-sm text-muted-foreground">
 					No encontramos tu perfil de cocinero.
 				</p>

@@ -1,3 +1,4 @@
+import type { Cook } from "@/entities/cooks";
 import type { UserRole } from "@/entities/users";
 
 /**
@@ -17,6 +18,12 @@ export interface AuthSessionResponseDto {
 	accessToken: string;
 	refreshToken: string;
 	user: AuthUserDto;
+	/**
+	 * Present only when `user.role` is "cook" — the caller's own cook
+	 * profile, so the client never has to look it up separately. Verified
+	 * against a real login response on 2026-08-17.
+	 */
+	cook?: Cook;
 }
 
 export interface RegisterDto {
