@@ -12,9 +12,9 @@ export function useCreateProduct() {
 		mutationKey: mutationKeys.products.create(),
 		mutationFn: (payload: CreateProductDto) => create(payload),
 		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.products.listAdmin(),
-			});
+			// Broad "products" prefix — covers the admin list and the public
+			// list (customer catalog + cook's own products page) alike.
+			queryClient.invalidateQueries({ queryKey: queryKeys.products.all() });
 			toast.success("Producto creado correctamente");
 		},
 		onError: (error) => {

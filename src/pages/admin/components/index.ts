@@ -6,7 +6,6 @@ export { CustomerRow, CustomerRowSkeleton } from "./customer-row";
 export { AdminMenuSheet } from "./menu-sheet";
 export { AdminNavbar } from "./navbar";
 export { OrderRow, OrderRowSkeleton } from "./order-row";
-export { ProductRow, ProductRowSkeleton } from "./product-row";
 export { AdminSidebar } from "./sidebar";
 export { StatCard, StatCardSkeleton } from "./stat-card";
 export { TagFormDialog } from "./tag-form-dialog";

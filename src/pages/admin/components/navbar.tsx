@@ -15,7 +15,7 @@ export function AdminNavbar() {
 				<Link to="/admin" className="flex items-center gap-2 text-primary">
 					<ShoppingBag className="size-5" />
 					<span className="text-lg font-bold tracking-tight">
-						Petroneo Admin
+						Petronio Admin
 					</span>
 				</Link>
 

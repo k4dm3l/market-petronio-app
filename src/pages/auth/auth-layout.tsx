@@ -39,7 +39,7 @@ export function AuthLayout({
 					<div className="mb-8 flex items-center gap-2 text-primary">
 						<ShoppingBag className="size-6" />
 						<span className="text-xl font-bold tracking-tight">
-							Petroneo Market
+							Petronio Market
 						</span>
 					</div>
 

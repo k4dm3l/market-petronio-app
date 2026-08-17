@@ -8,7 +8,7 @@ export function RegisterPage() {
 	return (
 		<AuthLayout
 			title="Crea tu cuenta"
-			description="Regístrate para empezar a comprar en Petroneo Market."
+			description="Regístrate para empezar a comprar en Petronio Market."
 			footer={
 				<span>
 					¿Ya tienes cuenta?{" "}

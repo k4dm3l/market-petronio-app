@@ -22,6 +22,8 @@ import {
 	RegisterPage,
 } from "@/pages/auth";
 import {
+	CookCreateProductPage,
+	CookEditProductPage,
 	CookLayout,
 	CookOrderDetailPage,
 	CookOrdersPage,
@@ -97,6 +99,11 @@ export const router = createBrowserRouter([
 			{ path: "orders", element: <CookOrdersPage /> },
 			{ path: "orders/:id", element: <CookOrderDetailPage /> },
 			{ path: "products", element: <CookProductsPage /> },
+			{ path: "products/new", element: <CookCreateProductPage /> },
+			{
+				path: "products/:productId/edit",
+				element: <CookEditProductPage />,
+			},
 		],
 	},
 	{

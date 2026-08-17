@@ -1,11 +1,15 @@
 import { Package } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useGetAllCooks } from "@/entities/cooks";
-import { useGetAllProductsInfinite } from "@/entities/products";
+import {
+	useGetAllProductsInfinite,
+	useSetProductActive,
+} from "@/entities/products";
+import { ProductRow, ProductRowSkeleton } from "@/features/products";
 import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
 import { Spinner } from "@/shared/components/ui/spinner";
-import { AdminListHeader, ProductRow, ProductRowSkeleton } from "./components";
+import { AdminListHeader } from "./components";
 
 function normalize(value: string) {
 	return value.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
@@ -25,6 +29,7 @@ export function AdminProductsPage() {
 		isFetchingNextPage,
 	} = useGetAllProductsInfinite();
 	const { data: cooks } = useGetAllCooks();
+	const setProductActive = useSetProductActive();
 
 	const products = data?.pages.flatMap((page) => page.data);
 
@@ -89,6 +94,19 @@ export function AdminProductsPage() {
 							<ProductRow
 								product={product}
 								cookName={cookNameById.get(product.cookId)}
+								editHref={`/admin/cooks/${product.cookId}/products/${product.id}/edit`}
+								statusLabel={product.isActive ? "Activo" : "Inactivo"}
+								isStatusOn={product.isActive}
+								toggleLabel={
+									product.isActive ? "Desactivar producto" : "Activar producto"
+								}
+								isBusy={setProductActive.isPending}
+								onToggleStatus={() =>
+									setProductActive.mutate({
+										id: product.id,
+										payload: { isActive: !product.isActive },
+									})
+								}
 							/>
 						</div>
 					))}

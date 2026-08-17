@@ -16,8 +16,12 @@ export const createProductSchema = z
 		categoryId: z.string().min(1, "Selecciona una categoría"),
 		availability: z.enum(["available", "made_to_order"]),
 		// General attribute, always visible/editable regardless of
-		// availability — validated directly, no conditional needed.
-		preparationTimeHours: z.number().positive("Debe ser mayor a 0").optional(),
+		// availability — validated directly, no conditional needed. Required
+		// (defaults to 1 in the form) rather than optional.
+		preparationTimeHours: z
+			.number()
+			.int("Debe ser un número entero")
+			.positive("Debe ser mayor a 0"),
 		// Only shown/editable in the form when availability=made_to_order —
 		// left unconstrained here so a stray value inherited from a product
 		// that doesn't use this field (availability=available) can't block

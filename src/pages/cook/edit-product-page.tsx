@@ -3,15 +3,15 @@ import { Link, useNavigate, useParams } from "react-router";
 import { useGetProduct } from "@/entities/products";
 import { ProductForm } from "@/features/products";
 
-export function AdminEditProductPage() {
-	const { id = "", productId = "" } = useParams();
+export function CookEditProductPage() {
+	const { productId = "" } = useParams();
 	const navigate = useNavigate();
 	const { data: product, isPending, isError } = useGetProduct(productId);
 
 	return (
 		<div className="flex flex-col gap-6">
 			<Link
-				to={`/admin/cooks/${id}/products`}
+				to="/products"
 				className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
 			>
 				<ArrowLeft className="size-4" />
@@ -31,7 +31,7 @@ export function AdminEditProductPage() {
 			{!isPending && !isError && !product && (
 				<p className="text-sm text-muted-foreground">
 					Producto no encontrado.{" "}
-					<Link to={`/admin/cooks/${id}/products`} className="underline">
+					<Link to="/products" className="underline">
 						Volver a productos
 					</Link>
 				</p>
@@ -49,10 +49,8 @@ export function AdminEditProductPage() {
 					<ProductForm
 						cookId={product.cookId}
 						product={product}
-						cancelHref={`/admin/cooks/${product.cookId}/products`}
-						onSuccess={() =>
-							navigate(`/admin/cooks/${product.cookId}/products`)
-						}
+						cancelHref="/products"
+						onSuccess={() => navigate("/products")}
 					/>
 				</>
 			)}

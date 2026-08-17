@@ -2,11 +2,15 @@ import { ArrowLeft, Package, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 import { useGetAllCooks } from "@/entities/cooks";
-import { useGetAllProductsInfinite } from "@/entities/products";
+import {
+	useGetAllProductsInfinite,
+	useSetProductActive,
+} from "@/entities/products";
+import { ProductRow, ProductRowSkeleton } from "@/features/products";
 import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
 import { Spinner } from "@/shared/components/ui/spinner";
-import { AdminListHeader, ProductRow, ProductRowSkeleton } from "./components";
+import { AdminListHeader } from "./components";
 
 function normalize(value: string) {
 	return value.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
@@ -31,6 +35,7 @@ export function AdminCookProductsPage() {
 		hasNextPage,
 		isFetchingNextPage,
 	} = useGetAllProductsInfinite();
+	const setProductActive = useSetProductActive();
 
 	const cook = cooks?.find((c) => c.id === id);
 	const products = data?.pages.flatMap((page) => page.data);
@@ -121,7 +126,24 @@ export function AdminCookProductsPage() {
 							{filtered.map((product, index) => (
 								<div key={product.id}>
 									{index > 0 && <Separator />}
-									<ProductRow product={product} />
+									<ProductRow
+										product={product}
+										editHref={`/admin/cooks/${product.cookId}/products/${product.id}/edit`}
+										statusLabel={product.isActive ? "Activo" : "Inactivo"}
+										isStatusOn={product.isActive}
+										toggleLabel={
+											product.isActive
+												? "Desactivar producto"
+												: "Activar producto"
+										}
+										isBusy={setProductActive.isPending}
+										onToggleStatus={() =>
+											setProductActive.mutate({
+												id: product.id,
+												payload: { isActive: !product.isActive },
+											})
+										}
+									/>
 								</div>
 							))}
 						</div>

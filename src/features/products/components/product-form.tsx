@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { Link } from "react-router";
-import { useGetAllCategories } from "@/entities/categories";
+import { useGetCategories } from "@/entities/categories";
 import type {
 	CreateProductDto,
 	Product,
@@ -53,9 +53,16 @@ interface ProductFormProps {
 	/** When provided, the form edits this product instead of creating a new one. */
 	product?: Product;
 	onSuccess: () => void;
+	/** Where "Cancelar" navigates back to — differs between admin and cook. */
+	cancelHref: string;
 }
 
-export function ProductForm({ cookId, product, onSuccess }: ProductFormProps) {
+export function ProductForm({
+	cookId,
+	product,
+	onSuccess,
+	cancelHref,
+}: ProductFormProps) {
 	const isEditMode = Boolean(product);
 
 	const { register, handleSubmit, formState, setValue, control } =
@@ -68,7 +75,7 @@ export function ProductForm({ cookId, product, onSuccess }: ProductFormProps) {
 				stock: product?.stock ?? 0,
 				categoryId: product?.categoryId ?? "",
 				availability: product?.availability ?? "available",
-				preparationTimeHours: product?.preparationTimeHours,
+				preparationTimeHours: product?.preparationTimeHours ?? 1,
 				minimumOrderQuantity: product?.minimumOrderQuantity,
 				tags: product?.tags ?? [],
 				isAvailable: product?.isAvailable ?? true,
@@ -76,7 +83,7 @@ export function ProductForm({ cookId, product, onSuccess }: ProductFormProps) {
 		});
 	const createProduct = useCreateProduct();
 	const updateProduct = useUpdateProduct();
-	const { data: categories } = useGetAllCategories();
+	const { data: categories } = useGetCategories({ limit: 100 });
 
 	const [stagedImages, setStagedImages] = useState<ProductImageItemDto[]>([]);
 
@@ -306,11 +313,11 @@ export function ProductForm({ cookId, product, onSuccess }: ProductFormProps) {
 							id="product-prep-time"
 							type="number"
 							inputMode="numeric"
-							min={0}
+							min={1}
 							placeholder="Ej: 48"
 							aria-invalid={!!formState.errors.preparationTimeHours}
 							{...register("preparationTimeHours", {
-								setValueAs: toOptionalNumber,
+								setValueAs: toRequiredNumber,
 							})}
 						/>
 						<FieldError errors={[formState.errors.preparationTimeHours]} />
@@ -365,7 +372,7 @@ export function ProductForm({ cookId, product, onSuccess }: ProductFormProps) {
 					<Button
 						type="button"
 						variant="outline"
-						render={<Link to={`/admin/cooks/${cookId}/products`} />}
+						render={<Link to={cancelHref} />}
 					>
 						Cancelar
 					</Button>

@@ -7,7 +7,6 @@ import {
 } from "lucide-react";
 import { Link } from "react-router";
 import type { Product } from "@/entities/products";
-import { useSetProductActive } from "@/entities/products";
 import {
 	Avatar,
 	AvatarFallback,
@@ -29,10 +28,30 @@ import { cn } from "@/shared/lib/utils";
 interface ProductRowProps {
 	product: Product;
 	cookName?: string;
+	editHref: string;
+	/** Label for the status badge, e.g. "Activo"/"Inactivo" (admin) or "Disponible"/"Oculto" (cook). */
+	statusLabel: string;
+	isStatusOn: boolean;
+	/** Label for the toggle action, e.g. "Desactivar producto" / "Activar producto". */
+	toggleLabel: string;
+	onToggleStatus: () => void;
+	isBusy?: boolean;
 }
 
-export function ProductRow({ product, cookName }: ProductRowProps) {
-	const { mutate, isPending } = useSetProductActive();
+// Presentational + action-agnostic: the status field being toggled (isActive
+// vs isAvailable) and its mutation differ by caller — admin manages isActive
+// (admin-only per the API), cooks manage isAvailable on their own products —
+// so both are passed in rather than baked in here.
+export function ProductRow({
+	product,
+	cookName,
+	editHref,
+	statusLabel,
+	isStatusOn,
+	toggleLabel,
+	onToggleStatus,
+	isBusy = false,
+}: ProductRowProps) {
 	const image = product.images[0]?.url;
 
 	return (
@@ -76,12 +95,12 @@ export function ProductRow({ product, cookName }: ProductRowProps) {
 			<Badge
 				className={cn(
 					"shrink-0 border",
-					product.isActive
+					isStatusOn
 						? "border-emerald-600/15 bg-emerald-600/10 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-400"
 						: "border-transparent bg-muted text-muted-foreground",
 				)}
 			>
-				{product.isActive ? "Activo" : "Inactivo"}
+				{statusLabel}
 			</Badge>
 
 			<DropdownMenu>
@@ -92,7 +111,7 @@ export function ProductRow({ product, cookName }: ProductRowProps) {
 							variant="ghost"
 							size="icon"
 							aria-label={`Acciones para ${product.name}`}
-							disabled={isPending}
+							disabled={isBusy}
 						/>
 					}
 				>
@@ -100,30 +119,17 @@ export function ProductRow({ product, cookName }: ProductRowProps) {
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end">
 					<DropdownMenuGroup>
-						<DropdownMenuItem
-							render={
-								<Link
-									to={`/admin/cooks/${product.cookId}/products/${product.id}/edit`}
-								/>
-							}
-						>
+						<DropdownMenuItem render={<Link to={editHref} />}>
 							<Pencil className="size-5" />
 							Editar producto
 						</DropdownMenuItem>
-						<DropdownMenuItem
-							onClick={() =>
-								mutate({
-									id: product.id,
-									payload: { isActive: !product.isActive },
-								})
-							}
-						>
-							{product.isActive ? (
+						<DropdownMenuItem onClick={onToggleStatus}>
+							{isStatusOn ? (
 								<PackageX className="size-5" />
 							) : (
 								<PackageCheck className="size-5" />
 							)}
-							{product.isActive ? "Desactivar producto" : "Activar producto"}
+							{toggleLabel}
 						</DropdownMenuItem>
 					</DropdownMenuGroup>
 				</DropdownMenuContent>

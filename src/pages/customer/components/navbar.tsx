@@ -18,7 +18,7 @@ export function Navbar({ onOpenCart }: NavbarProps) {
 				<Link to="/search" className="flex items-center gap-2 text-primary">
 					<ShoppingBag className="size-5" />
 					<span className="text-lg font-bold tracking-tight">
-						Petroneo Market
+						Petronio Market
 					</span>
 				</Link>
 

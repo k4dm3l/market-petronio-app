@@ -1,7 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router";
 import { useGetAllCooks } from "@/entities/cooks";
-import { ProductForm } from "./components/product-form";
+import { ProductForm } from "@/features/products";
 
 export function AdminCreateProductPage() {
 	const { id = "" } = useParams();
@@ -51,6 +51,7 @@ export function AdminCreateProductPage() {
 
 					<ProductForm
 						cookId={cook.id}
+						cancelHref={`/admin/cooks/${cook.id}/products`}
 						onSuccess={() => navigate(`/admin/cooks/${cook.id}/products`)}
 					/>
 				</>
