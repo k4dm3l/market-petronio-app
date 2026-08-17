@@ -2,7 +2,6 @@ import { Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import type { OrderStatus } from "@/entities/orders";
-import { useGetOrders } from "@/entities/orders";
 import {
 	ORDER_STATUS_META,
 	OrderStatusBadge,
@@ -13,6 +12,7 @@ import { Input } from "@/shared/components/ui/input";
 import { useDebouncedValue } from "@/shared/hooks";
 import { formatCurrency, formatDate } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/utils";
+import { MOCK_ORDERS } from "./mock-orders";
 
 const STATUS_FILTERS: { value: OrderStatus | "all"; label: string }[] = [
 	{ value: "all", label: "Todos" },
@@ -22,12 +22,7 @@ const STATUS_FILTERS: { value: OrderStatus | "all"; label: string }[] = [
 	})),
 ];
 
-function normalize(value: string) {
-	return value.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-}
-
 export function CookOrdersPage() {
-	const { data, isPending, isError } = useGetOrders();
 	const [searchParams, setSearchParams] = useSearchParams();
 
 	const status = searchParams.get("status") ?? "all";
@@ -60,24 +55,23 @@ export function CookOrdersPage() {
 		);
 	}, [debouncedSearch, setSearchParams]);
 
+	// The list endpoint only returns { id, status, paymentStatus, total,
+	// createdAt } — no order number — so search matches against the id.
 	const filtered = useMemo(() => {
-		if (!data) return [];
-		const q = normalize(searchInput.trim());
-		return data.filter((order) => {
+		const q = searchInput.trim().toLowerCase();
+		return MOCK_ORDERS.filter((order) => {
 			const matchesStatus = status === "all" || order.status === status;
-			const matchesQuery = !q || normalize(order.orderNumber).includes(q);
+			const matchesQuery = !q || order.id.toLowerCase().includes(q);
 			return matchesStatus && matchesQuery;
 		});
-	}, [data, status, searchInput]);
+	}, [status, searchInput]);
 
 	return (
 		<div className="flex flex-col gap-6">
 			<div>
 				<h1 className="text-4xl font-semibold">Pedidos</h1>
 				<p className="mt-2 text-sm text-muted-foreground">
-					{data === undefined
-						? "Cargando tus pedidos..."
-						: `${filtered.length} de ${data.length} pedidos`}
+					{filtered.length} de {MOCK_ORDERS.length} pedidos
 				</p>
 			</div>
 
@@ -113,13 +107,7 @@ export function CookOrdersPage() {
 				})}
 			</div>
 
-			{isError && (
-				<p className="text-sm text-destructive">
-					No se pudieron cargar tus pedidos.
-				</p>
-			)}
-
-			{data !== undefined && filtered.length === 0 && (
+			{filtered.length === 0 && (
 				<div className="flex flex-col items-center gap-1 rounded-2xl border border-dashed border-border py-16 text-center">
 					<p className="text-sm font-medium">No se encontraron pedidos</p>
 					<p className="text-sm text-muted-foreground">
@@ -132,48 +120,37 @@ export function CookOrdersPage() {
 
 			{filtered.length > 0 && (
 				<ul className="flex flex-col gap-3">
-					{filtered.map((order) => {
-						const itemCount = order.items.reduce(
-							(sum, item) => sum + item.quantity,
-							0,
-						);
-						return (
-							<li
-								key={order.id}
-								className="flex flex-col gap-3 rounded-2xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between"
-							>
-								<div>
-									<p className="text-sm font-semibold">
-										Pedido #{order.orderNumber}
-									</p>
-									<p className="text-sm text-muted-foreground">
-										{formatDate(order.createdAt)} · {itemCount}{" "}
-										{itemCount === 1 ? "producto" : "productos"}
-									</p>
-								</div>
+					{filtered.map((order) => (
+						<li
+							key={order.id}
+							className="flex flex-col gap-3 rounded-2xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between"
+						>
+							<div>
+								<p className="text-sm font-semibold">
+									Pedido #{order.id.slice(-6).toUpperCase()}
+								</p>
+								<p className="text-sm text-muted-foreground">
+									{formatDate(order.createdAt)}
+								</p>
+							</div>
 
-								<div className="flex flex-wrap items-center gap-2">
-									<PaymentStatusBadge status={order.payment.status} />
-									<OrderStatusBadge status={order.status} />
-									<span className="text-sm font-bold">
-										{formatCurrency(order.totals.total)}
-									</span>
-									<Button
-										size="sm"
-										variant="outline"
-										render={<Link to={`/orders/${order.id}`} />}
-									>
-										Ver detalle
-									</Button>
-								</div>
-							</li>
-						);
-					})}
+							<div className="flex flex-wrap items-center gap-2">
+								<PaymentStatusBadge status={order.paymentStatus} />
+								<OrderStatusBadge status={order.status} />
+								<span className="text-sm font-bold">
+									{formatCurrency(order.total)}
+								</span>
+								<Button
+									size="sm"
+									variant="outline"
+									render={<Link to={`/orders/${order.id}`} />}
+								>
+									Ver detalle
+								</Button>
+							</div>
+						</li>
+					))}
 				</ul>
-			)}
-
-			{isPending && (
-				<p className="text-sm text-muted-foreground">Cargando pedidos...</p>
 			)}
 		</div>
 	);

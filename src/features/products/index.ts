@@ -1,5 +1,6 @@
 export {
 	ProductCard,
+	ProductDetailSheet,
 	ProductForm,
 	ProductImageUploadField,
 	ProductRow,
