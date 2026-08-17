@@ -3,8 +3,8 @@ import { RequireRole, RootRedirect } from "@/app/guards";
 import { Role } from "@/entities/session";
 import {
 	AdminCategoriesPage,
-	AdminCookProductsPage,
 	AdminConvertToCookPage,
+	AdminCookProductsPage,
 	AdminCooksPage,
 	AdminCreateProductPage,
 	AdminCustomersPage,
