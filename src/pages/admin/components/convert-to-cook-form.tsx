@@ -14,7 +14,6 @@ import {
 import { Input } from "@/shared/components/ui/input";
 import { Separator } from "@/shared/components/ui/separator";
 import { Textarea } from "@/shared/components/ui/textarea";
-import { getErrorMessage } from "@/shared/lib/error";
 import {
 	convertToCookSchema,
 	type ConvertToCookFormValues,
@@ -198,10 +197,6 @@ export function ConvertToCookForm({ userId, onSuccess }: ConvertToCookFormProps)
 				<h2 className="text-2xl font-semibold">Métodos de pago</h2>
 
 				<PaymentMethodsField control={control} />
-
-				{createCook.isError && (
-					<FieldError>{getErrorMessage(createCook.error)}</FieldError>
-				)}
 
 				<Separator />
 

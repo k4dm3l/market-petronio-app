@@ -64,8 +64,12 @@ export const queryKeys = {
 		all: () => ["notifications"] as const,
 	},
 	tags: {
+		// A bare top-level prefix — `invalidateQueries` against this matches
+		// every cached variant below it (list and listInfinite alike).
 		all: () => ["tags"] as const,
 		list: (params?: Record<string, unknown>) => ["tags", "list", params] as const,
+		listInfinite: (params?: Record<string, unknown>) =>
+			["tags", "list-infinite", params] as const,
 	},
 	geolocation: {
 		search: (query: string) => ["geolocation", "search", query] as const,

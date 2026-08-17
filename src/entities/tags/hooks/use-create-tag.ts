@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { mutationKeys, queryKeys } from "@/shared/config";
+import { getErrorMessage } from "@/shared/lib/error";
 import { create } from "../api/tags";
 import type { CreateTagDto } from "../model/types";
 
@@ -12,6 +14,9 @@ export function useCreateTag() {
 		mutationFn: (payload: CreateTagDto) => create(payload),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.tags.all() });
+		},
+		onError: (error) => {
+			toast.error(getErrorMessage(error));
 		},
 	});
 }

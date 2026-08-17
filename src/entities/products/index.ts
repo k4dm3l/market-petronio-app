@@ -11,6 +11,7 @@ export {
 export {
 	useCreateProduct,
 	useGetAllProducts,
+	useGetProduct,
 	useRemoveProductImage,
 	useSetProductActive,
 	useUpdateProduct,

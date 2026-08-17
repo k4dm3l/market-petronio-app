@@ -22,7 +22,6 @@ import {
 	SelectValue,
 } from "@/shared/components/ui/select";
 import { Separator } from "@/shared/components/ui/separator";
-import { getErrorMessage } from "@/shared/lib/error";
 import { formatCurrency, formatDate } from "@/shared/lib/format";
 
 export function CookOrderDetailPage() {
@@ -169,11 +168,6 @@ export function CookOrderDetailPage() {
 						</Button>
 					</div>
 
-					{(updateStatus.isError || updatePayment.isError) && (
-						<p className="text-sm text-destructive">
-							{getErrorMessage(updateStatus.error ?? updatePayment.error)}
-						</p>
-					)}
 				</>
 			)}
 		</div>

@@ -12,9 +12,9 @@ export function useUpdateProduct() {
 		mutationFn: ({ id, payload }: { id: string; payload: UpdateProductDto }) =>
 			update(id, payload),
 		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.products.listAdmin(),
-			});
+			// Broad "products" prefix — covers both the admin list and this
+			// product's detail query (edit page reads via useGetProduct).
+			queryClient.invalidateQueries({ queryKey: queryKeys.products.all() });
 			toast.success("Producto actualizado correctamente");
 		},
 		onError: (error) => {

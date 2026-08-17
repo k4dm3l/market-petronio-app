@@ -59,7 +59,14 @@ function PaymentMethodRow({ control, index, onRemove }: PaymentMethodRowProps) {
 					control={control}
 					name={`paymentMethods.${index}.type`}
 					render={({ field }) => (
-						<Select value={field.value} onValueChange={field.onChange}>
+						<Select
+							value={field.value}
+							onValueChange={field.onChange}
+							items={PAYMENT_METHOD_OPTIONS.map((option) => ({
+								value: option.id,
+								label: option.name,
+							}))}
+						>
 							<SelectTrigger className="w-full">
 								<SelectValue />
 							</SelectTrigger>

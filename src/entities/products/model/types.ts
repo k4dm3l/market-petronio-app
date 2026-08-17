@@ -15,12 +15,11 @@ export interface CreateProductDto {
 	/** Required minimum when made_to_order */
 	minimumOrderQuantity?: number;
 	/**
-	 * Ids from POST /products/images (temporary images owned by the caller).
-	 * Embedded on the product as `{ id, url, publicId }` subdocs. There is no
-	 * equivalent field on UpdateProductDto — images can only be attached at
-	 * creation time; afterwards only DELETE /products/images/:imageId works.
+	 * Items from POST /products/images (temporary images owned by the
+	 * caller) — same `{ id, url, publicId }` shape as embedded product
+	 * subdocs, sent back in full rather than as bare ids.
 	 */
-	images?: string[];
+	images?: ProductImageItemDto[];
 	/** Must already exist in the global tag catalog (POST /tags). Normalized to lowercase; max 10; unique */
 	tags?: string[];
 	isAvailable?: boolean;
@@ -35,6 +34,13 @@ export interface UpdateProductDto {
 	availability?: ProductAvailability;
 	preparationTimeHours?: number;
 	minimumOrderQuantity?: number;
+	/**
+	 * Not documented in the OpenAPI spec's UpdateProductDto schema, but the
+	 * backend does accept it — same shape as CreateProductDto.images. Send
+	 * the full merged (existing + new) item list, since it's unconfirmed
+	 * whether the backend appends or replaces the product's images array.
+	 */
+	images?: ProductImageItemDto[];
 	tags?: string[];
 	isAvailable?: boolean;
 	/** Admin soft-deactivate */

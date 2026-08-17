@@ -9,3 +9,5 @@ export { OrderRow, OrderRowSkeleton } from "./order-row";
 export { ProductRow, ProductRowSkeleton } from "./product-row";
 export { AdminSidebar } from "./sidebar";
 export { StatCard, StatCardSkeleton } from "./stat-card";
+export { TagFormDialog } from "./tag-form-dialog";
+export { TagRow, TagRowSkeleton } from "./tag-row";

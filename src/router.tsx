@@ -13,6 +13,7 @@ import {
 	AdminLayout,
 	AdminOrdersPage,
 	AdminProductsPage,
+	AdminTagsPage,
 } from "@/pages/admin";
 import {
 	LoginPage,
@@ -76,6 +77,7 @@ export const router = createBrowserRouter([
 				element: <AdminConvertToCookPage />,
 			},
 			{ path: "categories", element: <AdminCategoriesPage /> },
+			{ path: "tags", element: <AdminTagsPage /> },
 			{ path: "orders", element: <AdminOrdersPage /> },
 			{ path: "products", element: <AdminProductsPage /> },
 			{ path: "*", element: <Navigate to="/admin" replace /> },

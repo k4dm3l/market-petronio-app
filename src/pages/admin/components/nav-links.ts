@@ -1,6 +1,7 @@
 import {
 	ChefHat,
 	ClipboardList,
+	Hash,
 	LayoutDashboard,
 	type LucideIcon,
 	Package,
@@ -20,6 +21,7 @@ export const ADMIN_NAV_LINKS: AdminNavLink[] = [
 	{ to: "/admin/cooks", label: "Cocineros", icon: ChefHat },
 	{ to: "/admin/customers", label: "Clientes", icon: Users },
 	{ to: "/admin/categories", label: "Categorías", icon: Tag },
+	{ to: "/admin/tags", label: "Etiquetas", icon: Hash },
 	{ to: "/admin/orders", label: "Pedidos", icon: ClipboardList },
 	{ to: "/admin/products", label: "Productos", icon: Package },
 ];

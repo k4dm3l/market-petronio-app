@@ -1,13 +1,12 @@
 import { ArrowLeft } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router";
-import { useGetAllProducts } from "@/entities/products";
+import { useGetProduct } from "@/entities/products";
 import { ProductForm } from "./components/product-form";
 
 export function AdminEditProductPage() {
 	const { id = "", productId = "" } = useParams();
 	const navigate = useNavigate();
-	const { data: products, isPending, isError } = useGetAllProducts();
-	const product = products?.find((p) => p.id === productId);
+	const { data: product, isPending, isError } = useGetProduct(productId);
 
 	return (
 		<div className="flex flex-col gap-6">

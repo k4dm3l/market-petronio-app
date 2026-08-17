@@ -10,7 +10,6 @@ import type {
 	UpdateProductDto,
 } from "@/entities/products";
 import { useCreateProduct, useUpdateProduct } from "@/entities/products";
-import { useCreateTag } from "@/entities/tags";
 import { Button } from "@/shared/components/ui/button";
 import { CurrencyInput } from "@/shared/components/ui/currency-input";
 import {
@@ -31,13 +30,12 @@ import {
 import { Separator } from "@/shared/components/ui/separator";
 import { Switch } from "@/shared/components/ui/switch";
 import { Textarea } from "@/shared/components/ui/textarea";
-import { getErrorMessage } from "@/shared/lib/error";
 import {
-	createProductSchema,
 	type CreateProductFormValues,
+	createProductSchema,
 } from "../schemas/create-product.schema";
 import { ProductImageUploadField } from "./product-image-upload-field";
-import { SpecialtyChipsField } from "./specialty-chips-field";
+import { ProductTagsField } from "./product-tags-field";
 
 function toOptionalNumber(value: string): number | undefined {
 	return value === "" ? undefined : Number(value);
@@ -78,27 +76,18 @@ export function ProductForm({ cookId, product, onSuccess }: ProductFormProps) {
 		});
 	const createProduct = useCreateProduct();
 	const updateProduct = useUpdateProduct();
-	const createTag = useCreateTag();
 	const { data: categories } = useGetAllCategories();
 
 	const [stagedImages, setStagedImages] = useState<ProductImageItemDto[]>([]);
-	const [isRegisteringTags, setIsRegisteringTags] = useState(false);
 
 	const availability = useWatch({ control, name: "availability" });
 	const tags = useWatch({ control, name: "tags" });
 
-	const isSubmitting =
-		createProduct.isPending || updateProduct.isPending || isRegisteringTags;
+	const isSubmitting = createProduct.isPending || updateProduct.isPending;
 
-	const onSubmit = handleSubmit(async (values) => {
-		// Tags must already exist in the global catalog — registering is
-		// idempotent, so this is safe even for tags that already exist.
-		setIsRegisteringTags(true);
-		await Promise.allSettled(
-			values.tags.map((text) => createTag.mutateAsync({ text })),
-		);
-		setIsRegisteringTags(false);
-
+	// Tags are already registered in the global catalog as they're picked in
+	// ProductTagsField, so submit just sends the (already-valid) text list.
+	const onSubmit = handleSubmit((values) => {
 		const shared = {
 			name: values.name,
 			description: values.description,
@@ -106,10 +95,7 @@ export function ProductForm({ cookId, product, onSuccess }: ProductFormProps) {
 			stock: values.stock,
 			categoryId: values.categoryId,
 			availability: values.availability,
-			preparationTimeHours:
-				values.availability === "made_to_order"
-					? values.preparationTimeHours
-					: undefined,
+			preparationTimeHours: values.preparationTimeHours,
 			minimumOrderQuantity:
 				values.availability === "made_to_order"
 					? values.minimumOrderQuantity
@@ -119,15 +105,24 @@ export function ProductForm({ cookId, product, onSuccess }: ProductFormProps) {
 		};
 
 		if (isEditMode && product) {
-			// Images can only be attached at creation time (UpdateProductDto has
-			// no `images` field) — the field only allows removing them here.
-			const payload: UpdateProductDto = shared;
+			// UpdateProductDto doesn't document an `images` field, but the
+			// backend does accept it — send the full merged list (existing +
+			// newly staged) rather than just the new ones, in case it replaces
+			// the array instead of appending to it. Same item shape as create
+			// ({ id, url, publicId }), not bare ids.
+			const payload: UpdateProductDto =
+				stagedImages.length > 0
+					? {
+							...shared,
+							images: [...(product.images ?? []), ...stagedImages],
+						}
+					: shared;
 			updateProduct.mutate({ id: product.id, payload }, { onSuccess });
 		} else {
 			const payload: CreateProductDto = {
 				...shared,
 				cookId,
-				images: stagedImages.map((image) => image.id),
+				images: stagedImages,
 			};
 			createProduct.mutate(payload, { onSuccess });
 		}
@@ -138,10 +133,10 @@ export function ProductForm({ cookId, product, onSuccess }: ProductFormProps) {
 			<FieldGroup>
 				<h2 className="text-2xl font-semibold">Imágenes</h2>
 				<ProductImageUploadField
-					existingImages={product?.images}
+					existingImages={product?.images ?? []}
 					value={stagedImages}
 					onChange={setStagedImages}
-					canAddImages={!isEditMode}
+					isEditMode={isEditMode}
 				/>
 
 				<Separator />
@@ -181,7 +176,16 @@ export function ProductForm({ cookId, product, onSuccess }: ProductFormProps) {
 								control={control}
 								name="categoryId"
 								render={({ field }) => (
-									<Select value={field.value} onValueChange={field.onChange}>
+									<Select
+										value={field.value}
+										onValueChange={field.onChange}
+										items={
+											categories?.map((category) => ({
+												value: category.id,
+												label: category.name,
+											})) ?? []
+										}
+									>
 										<SelectTrigger
 											id="product-category"
 											className="w-full"
@@ -212,7 +216,9 @@ export function ProductForm({ cookId, product, onSuccess }: ProductFormProps) {
 									variant={availability === "available" ? "default" : "outline"}
 									className="flex-1"
 									onClick={() =>
-										setValue("availability", "available", { shouldValidate: true })
+										setValue("availability", "available", {
+											shouldValidate: true,
+										})
 									}
 								>
 									Disponible
@@ -239,7 +245,7 @@ export function ProductForm({ cookId, product, onSuccess }: ProductFormProps) {
 				<Field data-invalid={!!formState.errors.tags}>
 					<FieldLabel htmlFor="product-tags">Etiquetas</FieldLabel>
 					<FieldContent>
-						<SpecialtyChipsField
+						<ProductTagsField
 							id="product-tags"
 							value={tags}
 							hasError={!!formState.errors.tags}
@@ -293,46 +299,44 @@ export function ProductForm({ cookId, product, onSuccess }: ProductFormProps) {
 					</Field>
 				</div>
 
-				{availability === "made_to_order" && (
-					<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-						<Field data-invalid={!!formState.errors.minimumOrderQuantity}>
-							<FieldLabel htmlFor="product-min-order">
-								Cantidad mínima de pedido
-							</FieldLabel>
-							<FieldContent>
-								<Input
-									id="product-min-order"
-									type="number"
-									inputMode="numeric"
-									min={0}
-									{...register("minimumOrderQuantity", {
-										setValueAs: toOptionalNumber,
-									})}
-								/>
-								<FieldError errors={[formState.errors.minimumOrderQuantity]} />
-							</FieldContent>
-						</Field>
+				<Field data-invalid={!!formState.errors.preparationTimeHours}>
+					<FieldLabel htmlFor="product-prep-time">
+						Tiempo de preparación (horas)
+					</FieldLabel>
+					<FieldContent>
+						<Input
+							id="product-prep-time"
+							type="number"
+							inputMode="numeric"
+							min={0}
+							placeholder="Ej: 48"
+							aria-invalid={!!formState.errors.preparationTimeHours}
+							{...register("preparationTimeHours", {
+								setValueAs: toOptionalNumber,
+							})}
+						/>
+						<FieldError errors={[formState.errors.preparationTimeHours]} />
+					</FieldContent>
+				</Field>
 
-						<Field data-invalid={!!formState.errors.preparationTimeHours}>
-							<FieldLabel htmlFor="product-prep-time">
-								Tiempo de preparación (horas)
-							</FieldLabel>
-							<FieldContent>
-								<Input
-									id="product-prep-time"
-									type="number"
-									inputMode="numeric"
-									min={0}
-									placeholder="Ej: 48"
-									aria-invalid={!!formState.errors.preparationTimeHours}
-									{...register("preparationTimeHours", {
-										setValueAs: toOptionalNumber,
-									})}
-								/>
-								<FieldError errors={[formState.errors.preparationTimeHours]} />
-							</FieldContent>
-						</Field>
-					</div>
+				{availability === "made_to_order" && (
+					<Field data-invalid={!!formState.errors.minimumOrderQuantity}>
+						<FieldLabel htmlFor="product-min-order">
+							Cantidad mínima de pedido
+						</FieldLabel>
+						<FieldContent>
+							<Input
+								id="product-min-order"
+								type="number"
+								inputMode="numeric"
+								min={0}
+								{...register("minimumOrderQuantity", {
+									setValueAs: toOptionalNumber,
+								})}
+							/>
+							<FieldError errors={[formState.errors.minimumOrderQuantity]} />
+						</FieldContent>
+					</Field>
 				)}
 
 				<Controller
@@ -356,12 +360,6 @@ export function ProductForm({ cookId, product, onSuccess }: ProductFormProps) {
 						</div>
 					)}
 				/>
-
-				{(createProduct.isError || updateProduct.isError) && (
-					<FieldError>
-						{getErrorMessage(createProduct.error ?? updateProduct.error)}
-					</FieldError>
-				)}
 
 				<Separator />
 
