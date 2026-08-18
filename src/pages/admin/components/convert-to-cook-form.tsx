@@ -38,11 +38,9 @@ export function ConvertToCookForm({
 				displayName: "",
 				bio: "",
 				specialties: [],
-				// Pre-filled default while the real location-mapping flow isn't
-				// wired end-to-end; the search field still lets it be changed.
-				publicLocation: "Buenaventura, Valle del Cauca",
-				latitude: 3.8833,
-				longitude: -77.0319,
+				publicLocation: "",
+				latitude: 0,
+				longitude: 0,
 				paymentMethods: [],
 				contactWhatsApp: "",
 			},
@@ -136,17 +134,23 @@ export function ConvertToCookForm({
 						formState.errors.latitude,
 						formState.errors.longitude,
 					]}
-					onChange={(next) => {
+					onChange={(next, details) => {
+						// A real selection always validates immediately (clears any
+						// visible error right away). An invalidation (details is null —
+						// the user edited the text away from the last pick) only
+						// validates once the form has already been submitted once, so
+						// it stays silent until the user tries to submit.
+						const shouldValidate = details !== null || formState.isSubmitted;
 						setValue("publicLocation", next.address, {
-							shouldValidate: true,
+							shouldValidate,
 							shouldDirty: true,
 						});
 						setValue("latitude", next.latitude, {
-							shouldValidate: true,
+							shouldValidate,
 							shouldDirty: true,
 						});
 						setValue("longitude", next.longitude, {
-							shouldValidate: true,
+							shouldValidate,
 							shouldDirty: true,
 						});
 					}}

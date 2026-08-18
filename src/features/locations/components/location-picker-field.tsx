@@ -19,17 +19,24 @@ export interface LocationPickerValue {
 
 interface LocationPickerFieldProps {
 	value: LocationPickerValue;
-	/** `details` is the full place lookup — read city/department/country/zipcode off it if the form needs more than address+lat+lng. */
+	/**
+	 * `details` is the full place lookup — read city/department/country/zipcode
+	 * off it if the form needs more than address+lat+lng. `details` is `null`
+	 * when this call means "the previous selection is no longer valid" (the
+	 * user edited the search text without picking a new suggestion) rather
+	 * than a real selection — callers should reset without forcing immediate
+	 * validation in that case, see LocationAutocompleteInput's onInvalidate.
+	 */
 	onChange: (
 		value: LocationPickerValue,
-		details: AddressDetailsResponseDto,
+		details: AddressDetailsResponseDto | null,
 	) => void;
 	id?: string;
 	hasError?: boolean;
 	errors?: Array<{ message?: string } | undefined>;
 	searchLabel?: string;
 	searchPlaceholder?: string;
-	/** Hide the read-only Latitud/Longitud boxes for forms that only need the resolved value, not to display it. Defaults to true. */
+	/** Show the read-only Latitud/Longitud boxes. Latitude/longitude are payload-only fields, not something the user needs to see, so this defaults to false. */
 	showCoordinates?: boolean;
 	bias?: LocationBias;
 }
@@ -46,7 +53,7 @@ export function LocationPickerField({
 	errors,
 	searchLabel = "Buscar",
 	searchPlaceholder = "Buscar dirección...",
-	showCoordinates = true,
+	showCoordinates = false,
 	bias,
 }: LocationPickerFieldProps) {
 	return (
@@ -64,6 +71,9 @@ export function LocationPickerField({
 							const { latitude, longitude } = details.coordinates;
 							onChange({ address: description, latitude, longitude }, details);
 						}}
+						onInvalidate={() =>
+							onChange({ address: "", latitude: 0, longitude: 0 }, null)
+						}
 					/>
 					<FieldError errors={errors} />
 				</FieldContent>

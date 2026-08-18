@@ -13,6 +13,7 @@ import {
 	ComboboxList,
 	ComboboxStatus,
 } from "@/shared/components/ui/combobox";
+import { Spinner } from "@/shared/components/ui/spinner";
 import { getErrorMessage } from "@/shared/lib/error";
 
 export interface LocationBias {
@@ -24,6 +25,8 @@ export interface LocationBias {
 interface LocationAutocompleteInputProps {
 	value: string;
 	onSelect: (description: string, details: AddressDetailsResponseDto) => void;
+	/** Called once when the input text diverges from the last confirmed selection (or the initial `value`) by the user typing — signals the caller should drop any previously-resolved coordinates until a new suggestion is picked. */
+	onInvalidate?: () => void;
 	id?: string;
 	hasError?: boolean;
 	placeholder?: string;
@@ -46,17 +49,22 @@ function itemToStringLabel(prediction: LocationPredictionDto) {
 export function LocationAutocompleteInput({
 	value,
 	onSelect,
+	onInvalidate,
 	id,
 	hasError,
 	placeholder = "Buscar dirección...",
 	bias,
 }: LocationAutocompleteInputProps) {
 	const [query, setQuery] = useState(value);
-	// The text a selection just filled into the input — must never be
-	// searched for. Left as-is (not reset) once the user types again; the
-	// debounce settling to a different value is what naturally lifts the
-	// skip, see useSearchLocations' skipValue doc.
-	const [autoFilledText, setAutoFilledText] = useState<string | null>(null);
+	// The text of the last confirmed selection — either one made in this
+	// session, or (initially) the `value` this component was mounted with.
+	// Used for two things: (1) skip re-searching the text a selection just
+	// filled into the input, see useSearchLocations' skipValue doc; (2)
+	// detect when the user edits away from it, so we can tell the caller the
+	// previously-resolved coordinates no longer match what's on screen.
+	const [autoFilledText, setAutoFilledText] = useState<string | null>(
+		value || null,
+	);
 	const [resolvingPlaceId, setResolvingPlaceId] = useState<string | null>(null);
 
 	const { data: response, isFetching } = useSearchLocations(query, bias, {
@@ -85,12 +93,19 @@ export function LocationAutocompleteInput({
 	const trimmedQuery = query.trim();
 	const isBusy = isFetching || resolvingPlaceId !== null;
 
-	let status: string | null = null;
+	let status: React.ReactNode = null;
 	if (isBusy) {
-		status = "Buscando...";
-	} else if (trimmedQuery.length > 0 && trimmedQuery.length < 3) {
+		status = (
+			<span className="flex items-center gap-2">
+				<Spinner className="size-3.5" />
+				Buscando...
+			</span>
+		);
+	} else if (trimmedQuery.length === 0) {
+		status = "Escribe para buscar una dirección";
+	} else if (trimmedQuery.length < 3) {
 		status = "Escribe al menos 3 caracteres";
-	} else if (trimmedQuery.length >= 3 && predictions.length === 0) {
+	} else if (predictions.length === 0) {
 		status = `Sin resultados para "${trimmedQuery}".`;
 	}
 
@@ -102,7 +117,12 @@ export function LocationAutocompleteInput({
 			inputValue={query}
 			onInputValueChange={(next, { reason }) => {
 				setQuery(next);
-				if (reason === "item-press") setAutoFilledText(next);
+				if (reason === "item-press") {
+					setAutoFilledText(next);
+				} else if (autoFilledText !== null && next !== autoFilledText) {
+					setAutoFilledText(null);
+					onInvalidate?.();
+				}
 			}}
 			onValueChange={(next) =>
 				handleSelect(next as LocationPredictionDto | null)
@@ -114,8 +134,9 @@ export function LocationAutocompleteInput({
 				placeholder={placeholder}
 				aria-invalid={hasError}
 				showTrigger={false}
+				showClear
 			/>
-			<ComboboxContent>
+			<ComboboxContent className="min-w-(--anchor-width)">
 				<ComboboxStatus>{status}</ComboboxStatus>
 				<ComboboxList>
 					{(prediction: LocationPredictionDto) => (
