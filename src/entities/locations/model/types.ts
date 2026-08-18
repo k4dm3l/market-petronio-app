@@ -1,5 +1,3 @@
-import type { DeliveryGeoPointDto } from "@/entities/users";
-
 export interface SearchLocationsQuery {
 	/** Address search text (frontend should debounce 300–500ms) */
 	query: string;
@@ -12,34 +10,37 @@ export interface SearchLocationsQuery {
 }
 
 /**
- * The OpenAPI spec only names LocationSearchResponseDto via $ref, without a
- * schema body; inferred from the summary ("Autocomplete address search" via
- * Google Places Autocomplete). Verify field names against a real response.
+ * Verified against a real response on 2026-08-17: `{ data: [...] }`, each
+ * item just `{ placeId, description }`.
  */
 export interface LocationPredictionDto {
 	placeId: string;
 	description: string;
-	mainText?: string;
-	secondaryText?: string;
 }
 
 export interface LocationSearchResponseDto {
-	predictions: LocationPredictionDto[];
+	data: LocationPredictionDto[];
+}
+
+export interface LocationCoordinatesDto {
+	latitude: number;
+	longitude: number;
 }
 
 /**
- * The OpenAPI spec only names AddressDetailsResponseDto via $ref, without a
- * schema body. Its description says it "Maps to UserAddress fields", so this
- * mirrors CreateAddressDto/UserAddressResponseDto's location fields — minus
- * id/notes/isPrimary, which don't apply to a raw place lookup. Verify against
- * a real response.
+ * Verified against a real response on 2026-08-17. Note `coordinates` here is
+ * a plain `{ latitude, longitude }` pair — NOT a GeoJSON Point like the rest
+ * of the app's location fields (e.g. entities/users' DeliveryGeoPointDto).
  */
 export interface AddressDetailsResponseDto {
-	address: string;
+	placeId: string;
+	/** The full, canonical address string — prefer this over `address` for display/storage. */
+	formattedAddress: string;
+	/** A partial fragment (e.g. just the street), not the full address. */
+	address?: string;
 	city?: string;
 	department?: string;
 	country?: string;
 	zipcode?: string;
-	/** GeoJSON Point [longitude, latitude] */
-	coordinates: DeliveryGeoPointDto;
+	coordinates: LocationCoordinatesDto;
 }

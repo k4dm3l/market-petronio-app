@@ -87,9 +87,6 @@ export const queryKeys = {
 		listInfinite: (params?: Record<string, unknown>) =>
 			["tags", "list-infinite", params] as const,
 	},
-	geolocation: {
-		search: (query: string) => ["geolocation", "search", query] as const,
-	},
 	locations: {
 		search: (params: Record<string, unknown>) =>
 			["locations", "search", params] as const,

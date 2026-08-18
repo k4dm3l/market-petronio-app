@@ -3,7 +3,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { Link } from "react-router";
 import type { CreateCookDto } from "@/entities/cooks";
 import { useCreateCook } from "@/entities/cooks";
-import { LocationSearchField } from "@/features/geolocation";
+import { LocationPickerField } from "@/features/locations";
 import { Button } from "@/shared/components/ui/button";
 import {
 	Field,
@@ -123,65 +123,34 @@ export function ConvertToCookForm({
 				<Separator />
 				<h2 className="text-2xl font-semibold">Ubicación</h2>
 
-				<Field data-invalid={!!formState.errors.publicLocation}>
-					<FieldLabel htmlFor="convert-cook-location">Buscar</FieldLabel>
-					<FieldContent>
-						<LocationSearchField
-							id="convert-cook-location"
-							value={publicLocation}
-							hasError={!!formState.errors.publicLocation}
-							onSelect={(suggestion) => {
-								setValue("publicLocation", suggestion.name, {
-									shouldValidate: true,
-									shouldDirty: true,
-								});
-								setValue("latitude", suggestion.latitude, {
-									shouldValidate: true,
-									shouldDirty: true,
-								});
-								setValue("longitude", suggestion.longitude, {
-									shouldValidate: true,
-									shouldDirty: true,
-								});
-							}}
-						/>
-						<FieldError
-							errors={[
-								formState.errors.publicLocation,
-								formState.errors.latitude,
-								formState.errors.longitude,
-							]}
-						/>
-					</FieldContent>
-				</Field>
-
-				<div className="grid grid-cols-2 gap-3">
-					<Field>
-						<FieldLabel htmlFor="convert-cook-latitude">Latitud</FieldLabel>
-						<FieldContent>
-							<Input
-								id="convert-cook-latitude"
-								readOnly
-								tabIndex={-1}
-								className="cursor-default bg-muted/50 text-muted-foreground"
-								value={latitude || ""}
-							/>
-						</FieldContent>
-					</Field>
-
-					<Field>
-						<FieldLabel htmlFor="convert-cook-longitude">Longitud</FieldLabel>
-						<FieldContent>
-							<Input
-								id="convert-cook-longitude"
-								readOnly
-								tabIndex={-1}
-								className="cursor-default bg-muted/50 text-muted-foreground"
-								value={longitude || ""}
-							/>
-						</FieldContent>
-					</Field>
-				</div>
+				<LocationPickerField
+					id="convert-cook-location"
+					value={{ address: publicLocation, latitude, longitude }}
+					hasError={
+						!!formState.errors.publicLocation ||
+						!!formState.errors.latitude ||
+						!!formState.errors.longitude
+					}
+					errors={[
+						formState.errors.publicLocation,
+						formState.errors.latitude,
+						formState.errors.longitude,
+					]}
+					onChange={(next) => {
+						setValue("publicLocation", next.address, {
+							shouldValidate: true,
+							shouldDirty: true,
+						});
+						setValue("latitude", next.latitude, {
+							shouldValidate: true,
+							shouldDirty: true,
+						});
+						setValue("longitude", next.longitude, {
+							shouldValidate: true,
+							shouldDirty: true,
+						});
+					}}
+				/>
 
 				<Separator />
 				<h2 className="text-2xl font-semibold">Contacto</h2>

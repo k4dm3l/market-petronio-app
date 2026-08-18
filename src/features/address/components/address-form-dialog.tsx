@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
-import { LocationSearchField } from "@/features/geolocation";
+import { LocationPickerField } from "@/features/locations";
 import { Button } from "@/shared/components/ui/button";
 import {
 	Dialog,
@@ -13,11 +13,9 @@ import {
 import {
 	Field,
 	FieldContent,
-	FieldError,
 	FieldGroup,
 	FieldLabel,
 } from "@/shared/components/ui/field";
-import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
 import type { AddressFormValue } from "../model/types";
 import {
@@ -84,67 +82,34 @@ export function AddressFormDialog({
 					</DialogHeader>
 
 					<FieldGroup className="py-4">
-						<Field data-invalid={!!formState.errors.address}>
-							<FieldLabel htmlFor="address-form-search">Dirección</FieldLabel>
-							<FieldContent>
-								<LocationSearchField
-									id="address-form-search"
-									value={address}
-									hasError={!!formState.errors.address}
-									onSelect={(suggestion) => {
-										setValue("address", suggestion.name, {
-											shouldValidate: true,
-											shouldDirty: true,
-										});
-										setValue("latitude", suggestion.latitude, {
-											shouldValidate: true,
-											shouldDirty: true,
-										});
-										setValue("longitude", suggestion.longitude, {
-											shouldValidate: true,
-											shouldDirty: true,
-										});
-									}}
-								/>
-								<FieldError
-									errors={[
-										formState.errors.address,
-										formState.errors.latitude,
-										formState.errors.longitude,
-									]}
-								/>
-							</FieldContent>
-						</Field>
-
-						<div className="grid grid-cols-2 gap-3">
-							<Field>
-								<FieldLabel htmlFor="address-form-latitude">Latitud</FieldLabel>
-								<FieldContent>
-									<Input
-										id="address-form-latitude"
-										readOnly
-										tabIndex={-1}
-										className="cursor-default bg-muted/50 text-muted-foreground"
-										value={latitude || ""}
-									/>
-								</FieldContent>
-							</Field>
-
-							<Field>
-								<FieldLabel htmlFor="address-form-longitude">
-									Longitud
-								</FieldLabel>
-								<FieldContent>
-									<Input
-										id="address-form-longitude"
-										readOnly
-										tabIndex={-1}
-										className="cursor-default bg-muted/50 text-muted-foreground"
-										value={longitude || ""}
-									/>
-								</FieldContent>
-							</Field>
-						</div>
+						<LocationPickerField
+							id="address-form-search"
+							value={{ address, latitude, longitude }}
+							hasError={
+								!!formState.errors.address ||
+								!!formState.errors.latitude ||
+								!!formState.errors.longitude
+							}
+							errors={[
+								formState.errors.address,
+								formState.errors.latitude,
+								formState.errors.longitude,
+							]}
+							onChange={(next) => {
+								setValue("address", next.address, {
+									shouldValidate: true,
+									shouldDirty: true,
+								});
+								setValue("latitude", next.latitude, {
+									shouldValidate: true,
+									shouldDirty: true,
+								});
+								setValue("longitude", next.longitude, {
+									shouldValidate: true,
+									shouldDirty: true,
+								});
+							}}
+						/>
 
 						<Field>
 							<FieldLabel htmlFor="address-form-notes">
