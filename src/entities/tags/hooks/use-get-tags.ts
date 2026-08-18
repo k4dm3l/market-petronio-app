@@ -12,5 +12,6 @@ export function useGetTags(search = "", limit = 8) {
 		queryKey: queryKeys.tags.list(params),
 		queryFn: () => findAll(params),
 		placeholderData: keepPreviousData,
+		staleTime: 5 * 60 * 1000,
 	});
 }

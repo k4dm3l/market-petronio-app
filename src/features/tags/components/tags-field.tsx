@@ -7,7 +7,7 @@ import { cn } from "@/shared/lib/utils";
 
 const MAX_TAGS = 10;
 
-interface ProductTagsFieldProps {
+interface TagsFieldProps {
 	value: string[];
 	onChange: (next: string[]) => void;
 	id?: string;
@@ -16,27 +16,29 @@ interface ProductTagsFieldProps {
 
 // Picks from the existing global tag catalog only — POST /api/tags is
 // admin-only, so this selector can't create new tags on the fly. New tags
-// get added from the admin Etiquetas module.
-export function ProductTagsField({
-	value,
-	onChange,
-	id,
-	hasError,
-}: ProductTagsFieldProps) {
+// get added from the admin Etiquetas module. Shared by every form that
+// tags something against the same catalog (products, cook specialties, ...).
+export function TagsField({ value, onChange, id, hasError }: TagsFieldProps) {
 	const [query, setQuery] = useState("");
 	const [open, setOpen] = useState(false);
 	const [highlightedIndex, setHighlightedIndex] = useState(0);
 	const containerRef = useRef<HTMLDivElement>(null);
 
-	const { data: results, isFetching } = useGetTags(query);
+	// Fetched once (search is fixed at "") instead of per keystroke — up to
+	// 100 tags is the whole catalog for this kind of business, so searching
+	// stays local from here on instead of hitting the backend on every key.
+	const { data: results, isFetching } = useGetTags("", 100);
 	const atLimit = value.length >= MAX_TAGS;
 
+	const normalizedQuery = query.trim().toLowerCase();
 	const suggestions = useMemo(
 		() =>
 			(results ?? []).filter(
-				(tag) => !value.some((selected) => selected === tag.text),
+				(tag) =>
+					!value.some((selected) => selected === tag.text) &&
+					tag.text.toLowerCase().includes(normalizedQuery),
 			),
-		[results, value],
+		[results, value, normalizedQuery],
 	);
 
 	// Clamped instead of reset-via-effect: stays in range as the option list
@@ -137,7 +139,7 @@ export function ProductTagsField({
 			</div>
 
 			{open && !atLimit && query.trim().length > 0 && (
-				<ul className="absolute z-20 mt-1 w-full overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10">
+				<ul className="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10">
 					{suggestions.length > 0 ? (
 						suggestions.map((tag, index) => (
 							<li key={tag.id}>

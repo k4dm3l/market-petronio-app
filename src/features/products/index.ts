@@ -5,7 +5,6 @@ export {
 	ProductImageUploadField,
 	ProductRow,
 	ProductRowSkeleton,
-	ProductTagsField,
 } from "./components";
 export {
 	type CreateProductFormValues,

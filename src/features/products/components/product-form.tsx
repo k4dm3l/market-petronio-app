@@ -10,6 +10,7 @@ import type {
 	UpdateProductDto,
 } from "@/entities/products";
 import { useCreateProduct, useUpdateProduct } from "@/entities/products";
+import { TagsField } from "@/features/tags";
 import { Button } from "@/shared/components/ui/button";
 import { CurrencyInput } from "@/shared/components/ui/currency-input";
 import {
@@ -35,7 +36,6 @@ import {
 	createProductSchema,
 } from "../schemas/create-product.schema";
 import { ProductImageUploadField } from "./product-image-upload-field";
-import { ProductTagsField } from "./product-tags-field";
 
 function toOptionalNumber(value: string): number | undefined {
 	return value === "" ? undefined : Number(value);
@@ -93,7 +93,7 @@ export function ProductForm({
 	const isSubmitting = createProduct.isPending || updateProduct.isPending;
 
 	// Tags are already registered in the global catalog as they're picked in
-	// ProductTagsField, so submit just sends the (already-valid) text list.
+	// TagsField, so submit just sends the (already-valid) text list.
 	const onSubmit = handleSubmit((values) => {
 		const shared = {
 			name: values.name,
@@ -250,7 +250,7 @@ export function ProductForm({
 				<Field data-invalid={!!formState.errors.tags}>
 					<FieldLabel htmlFor="product-tags">Etiquetas</FieldLabel>
 					<FieldContent>
-						<ProductTagsField
+						<TagsField
 							id="product-tags"
 							value={tags}
 							hasError={!!formState.errors.tags}

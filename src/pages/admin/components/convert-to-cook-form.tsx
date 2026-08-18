@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import type { CreateCookDto } from "@/entities/cooks";
 import { useCreateCook } from "@/entities/cooks";
 import { LocationPickerField } from "@/features/locations";
+import { TagsField } from "@/features/tags";
 import { Button } from "@/shared/components/ui/button";
 import {
 	Field,
@@ -20,7 +21,6 @@ import {
 	convertToCookSchema,
 } from "../schemas/convert-to-cook.schema";
 import { PaymentMethodsField } from "./payment-methods-field";
-import { SpecialtyChipsField } from "./specialty-chips-field";
 
 interface ConvertToCookFormProps {
 	userId: string;
@@ -103,7 +103,7 @@ export function ConvertToCookForm({
 						Especialidades
 					</FieldLabel>
 					<FieldContent>
-						<SpecialtyChipsField
+						<TagsField
 							id="convert-cook-specialties"
 							value={specialties}
 							hasError={!!formState.errors.specialties}
