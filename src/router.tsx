@@ -33,6 +33,7 @@ import {
 } from "@/pages/cook";
 import {
 	CustomerCheckoutPage,
+	CustomerCooksPage,
 	CustomerOrderDetailPage,
 	CustomerOrdersPage,
 	CustomerSearchPage,
@@ -116,6 +117,14 @@ export const router = createBrowserRouter([
 		element: (
 			<RequireRole roles={[Role.Customer]}>
 				<CustomerSearchPage />
+			</RequireRole>
+		),
+	},
+	{
+		path: "/search/cooks",
+		element: (
+			<RequireRole roles={[Role.Customer]}>
+				<CustomerCooksPage />
 			</RequireRole>
 		),
 	},

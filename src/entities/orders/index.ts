@@ -9,7 +9,7 @@ export {
 } from "./api/orders";
 export {
 	useCreateOrder,
-	useGetAllOrders,
+	useGetAllOrdersInfinite,
 	useGetOrder,
 	useGetOrders,
 	useUpdateOrderPayment,
@@ -35,6 +35,8 @@ export type {
 	UpdateShippingDto,
 } from "./model/types";
 export {
+	getNextOrderStatus,
+	ORDER_STATUS_SEQUENCE,
 	OrderPaymentStatus,
 	OrderShippingStatus,
 	OrderStatus,

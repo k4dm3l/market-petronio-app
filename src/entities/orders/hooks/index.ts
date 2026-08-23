@@ -1,5 +1,5 @@
 export { useCreateOrder } from "./use-create-order";
-export { useGetAllOrders } from "./use-get-all-orders";
+export { useGetAllOrdersInfinite } from "./use-get-all-orders-infinite";
 export { useGetOrder } from "./use-get-order";
 export { useGetOrders } from "./use-get-orders";
 export { useUpdateOrderPayment } from "./use-update-order-payment";

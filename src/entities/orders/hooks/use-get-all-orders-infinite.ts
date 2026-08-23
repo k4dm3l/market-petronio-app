@@ -1,17 +1,20 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { listOrdersPage } from "@/entities/admin";
 import { queryKeys } from "@/shared/config";
 import { useDebouncedValue } from "@/shared/hooks";
-import { findAll } from "../api/orders";
 import type { OrderStatus } from "../model/types";
 
-interface UseGetOrdersParams {
+interface UseGetAllOrdersInfiniteParams {
 	status?: OrderStatus;
 	search?: string;
 }
 
-// Status + search are filtered server-side (GET /api/orders), so this only
-// fetches the pages matching the current filters.
-export function useGetOrders({ status, search = "" }: UseGetOrdersParams = {}) {
+// Status and search are filtered server-side (GET /api/admin/orders), so
+// this only fetches the pages matching the current filters.
+export function useGetAllOrdersInfinite({
+	status,
+	search = "",
+}: UseGetAllOrdersInfiniteParams = {}) {
 	const debouncedSearch = useDebouncedValue(search.trim(), 400);
 	const params = {
 		...(status ? { status } : {}),
@@ -19,9 +22,9 @@ export function useGetOrders({ status, search = "" }: UseGetOrdersParams = {}) {
 	};
 
 	return useInfiniteQuery({
-		queryKey: queryKeys.orders.listInfinite(params),
+		queryKey: queryKeys.orders.listAdminInfinite(params),
 		queryFn: ({ pageParam }: { pageParam: string | undefined }) =>
-			findAll({ ...params, cursor: pageParam }),
+			listOrdersPage({ ...params, cursor: pageParam }),
 		initialPageParam: undefined as string | undefined,
 		getNextPageParam: (lastPage) =>
 			lastPage.pagination.hasMore

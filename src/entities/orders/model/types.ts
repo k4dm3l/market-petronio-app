@@ -16,6 +16,26 @@ export const OrderStatus = {
 
 export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
 
+// The forward lifecycle a cook advances an order through, one step at a
+// time — Cancelled is a separate terminal state reachable from any of these,
+// not a step in this sequence.
+export const ORDER_STATUS_SEQUENCE: OrderStatus[] = [
+	OrderStatus.Pending,
+	OrderStatus.Confirmed,
+	OrderStatus.Preparing,
+	OrderStatus.ReadyToShip,
+	OrderStatus.Shipped,
+	OrderStatus.Delivered,
+];
+
+// Null when `status` is already the last step (Delivered) or isn't part of
+// the forward sequence (Cancelled).
+export function getNextOrderStatus(status: OrderStatus): OrderStatus | null {
+	const index = ORDER_STATUS_SEQUENCE.indexOf(status);
+	if (index === -1 || index === ORDER_STATUS_SEQUENCE.length - 1) return null;
+	return ORDER_STATUS_SEQUENCE[index + 1];
+}
+
 export const OrderPaymentStatus = {
 	Pending: "PENDING",
 	PaymentInstructions: "PAYMENT_INSTRUCTIONS",

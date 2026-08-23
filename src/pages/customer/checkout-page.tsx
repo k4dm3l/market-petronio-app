@@ -2,6 +2,7 @@ import { ArrowLeft, MapPin, ShoppingCart } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
+import type { CartItem } from "@/entities/cart";
 import { useCart } from "@/entities/cart";
 import type { CreateOrderDeliveryDto } from "@/entities/orders";
 import { useCreateOrder } from "@/entities/orders";
@@ -11,7 +12,25 @@ import { Button } from "@/shared/components/ui/button";
 import { getErrorMessage } from "@/shared/lib/error";
 import { formatCurrency } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/utils";
-import { CartLineItem, CartSheet, Navbar } from "./components";
+import {
+	CartSheet,
+	CookOrderCard,
+	type CookOrderStatus,
+	Navbar,
+} from "./components";
+
+function getItemsSubtotal(items: CartItem[]): number {
+	return items.reduce(
+		(total, item) => total + item.product.price * item.quantity,
+		0,
+	);
+}
+
+interface CookGroupSubmission {
+	status: CookOrderStatus;
+	errorMessage?: string;
+	snapshotItems: CartItem[];
+}
 
 type DeliveryChoice =
 	| { source: "CUSTOMER_PROFILE" }
@@ -24,7 +43,7 @@ type DeliveryChoice =
 	  };
 
 export function CustomerCheckoutPage() {
-	const { items, subtotal, clear } = useCart();
+	const { items, clear, removeItems } = useCart();
 	const { data: me } = useGetMe();
 	const createOrder = useCreateOrder();
 	const navigate = useNavigate();
@@ -36,6 +55,13 @@ export function CustomerCheckoutPage() {
 	const [deliveryOverride, setDeliveryOverride] =
 		useState<DeliveryChoice | null>(null);
 	const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+	const [groupSubmissions, setGroupSubmissions] = useState<
+		Record<string, CookGroupSubmission>
+	>({});
+	// Stable order in which cooks first appear during this checkout session —
+	// a succeeded cook's items are removed from the live cart, but its card
+	// must keep rendering, so it can't be derived from the cart alone.
+	const [cookOrder, setCookOrder] = useState<string[]>([]);
 
 	const primaryAddress =
 		me?.addresses.find((address) => address.isPrimary) ?? me?.addresses[0];
@@ -59,8 +85,50 @@ export function CustomerCheckoutPage() {
 		return groups;
 	}, [items]);
 
+	// Grow cookOrder as new cooks show up in the cart. A cook that already
+	// succeeded drops out of cookGroups (its items were removed), so this
+	// only ever appends, keeping its card on screen. Adjusting state directly
+	// during render (guarded, so it only fires when something is actually
+	// missing) instead of in an effect avoids an extra commit + re-render.
+	const missingCookIds = [...cookGroups.keys()].filter(
+		(cookId) => !cookOrder.includes(cookId),
+	);
+	if (missingCookIds.length > 0) {
+		setCookOrder([...cookOrder, ...missingCookIds]);
+	}
+
+	// Cooks that still need a (re)submission: never-attempted (idle) or
+	// previously failed (error) groups. Succeeded groups are excluded
+	// automatically since their items are no longer in cookGroups.
+	const pendingCookIds = useMemo(
+		() => cookOrder.filter((cookId) => cookGroups.has(cookId)),
+		[cookOrder, cookGroups],
+	);
+
+	const hasAttemptedBefore = Object.keys(groupSubmissions).length > 0;
+
+	// Sum across every card currently rendered (live items for idle/error
+	// groups, frozen snapshot for succeeded ones) instead of useCart().subtotal,
+	// which shrinks after each partial success and would look inconsistent
+	// with the cards still on screen.
+	const grandTotal = useMemo(() => {
+		return cookOrder.reduce((total, cookId) => {
+			const displayItems =
+				groupSubmissions[cookId]?.snapshotItems ?? cookGroups.get(cookId);
+			return total + getItemsSubtotal(displayItems ?? []);
+		}, 0);
+	}, [cookOrder, groupSubmissions, cookGroups]);
+
 	const canPlaceOrder =
-		items.length > 0 && delivery !== null && !isPlacingOrder;
+		pendingCookIds.length > 0 && delivery !== null && !isPlacingOrder;
+
+	const placeOrderLabel = isPlacingOrder
+		? "Enviando pedido..."
+		: pendingCookIds.length > 1
+			? `${hasAttemptedBefore ? "Reintentar" : "Finalizar"} ${pendingCookIds.length} pedidos${hasAttemptedBefore ? " pendientes" : ""}`
+			: hasAttemptedBefore
+				? "Reintentar pedido pendiente"
+				: "Finalizar orden";
 
 	const handleAddressSubmit = (value: AddressFormValue) => {
 		setDeliveryOverride({
@@ -74,7 +142,7 @@ export function CustomerCheckoutPage() {
 	};
 
 	const handlePlaceOrder = async () => {
-		if (!delivery) return;
+		if (!delivery || pendingCookIds.length === 0) return;
 
 		const deliveryDto: CreateOrderDeliveryDto =
 			delivery.source === "CUSTOMER_PROFILE"
@@ -90,24 +158,69 @@ export function CustomerCheckoutPage() {
 					};
 
 		setIsPlacingOrder(true);
-		try {
-			for (const [cookId, cookItems] of cookGroups) {
+		let succeededCount = 0;
+		let lastErrorMessage: string | undefined;
+
+		for (const cookId of pendingCookIds) {
+			const groupItems = cookGroups.get(cookId) ?? [];
+
+			setGroupSubmissions((prev) => ({
+				...prev,
+				[cookId]: {
+					status: "pending",
+					snapshotItems: groupItems,
+					errorMessage: undefined,
+				},
+			}));
+
+			try {
 				await createOrder.mutateAsync({
 					cookId,
-					items: cookItems.map((item) => ({
+					items: groupItems.map((item) => ({
 						productId: item.product.id,
 						quantity: item.quantity,
 					})),
 					delivery: deliveryDto,
 				});
+				setGroupSubmissions((prev) => ({
+					...prev,
+					[cookId]: { status: "success", snapshotItems: groupItems },
+				}));
+				removeItems(groupItems.map((item) => item.product.id));
+				succeededCount += 1;
+			} catch (error) {
+				const message = getErrorMessage(error);
+				lastErrorMessage = message;
+				setGroupSubmissions((prev) => ({
+					...prev,
+					[cookId]: {
+						status: "error",
+						snapshotItems: groupItems,
+						errorMessage: message,
+					},
+				}));
 			}
-			toast.success("Pedido realizado con éxito");
+		}
+
+		setIsPlacingOrder(false);
+		const failedCount = pendingCookIds.length - succeededCount;
+
+		if (failedCount === 0) {
+			toast.success(
+				succeededCount > 1
+					? "Pedidos realizados con éxito"
+					: "Pedido realizado con éxito",
+			);
 			clear();
 			navigate("/search");
-		} catch (error) {
-			toast.error(getErrorMessage(error));
-		} finally {
-			setIsPlacingOrder(false);
+		} else if (succeededCount > 0) {
+			toast.error(
+				`Se completaron ${succeededCount} de ${pendingCookIds.length} pedidos. Reintenta el pedido pendiente.`,
+			);
+		} else {
+			toast.error(
+				lastErrorMessage ?? "No se pudo completar tu pedido. Intenta de nuevo.",
+			);
 		}
 	};
 
@@ -162,17 +275,37 @@ export function CustomerCheckoutPage() {
 										Agregar más productos
 									</Link>
 								</div>
-								<ul className="flex flex-col gap-4 rounded-2xl border border-border p-4">
-									{items.map((item) => (
-										<CartLineItem key={item.product.id} item={item} />
-									))}
-								</ul>
+								<div className="flex flex-col gap-4">
+									{cookOrder.map((cookId) => {
+										const submission = groupSubmissions[cookId];
+										const displayItems =
+											submission?.snapshotItems ?? cookGroups.get(cookId);
+										if (!displayItems || displayItems.length === 0) {
+											return null;
+										}
+										return (
+											<CookOrderCard
+												key={cookId}
+												cookId={cookId}
+												items={displayItems}
+												status={submission?.status ?? "idle"}
+												errorMessage={submission?.errorMessage}
+												disabled={isPlacingOrder}
+											/>
+										);
+									})}
+								</div>
 							</div>
 
 							<div>
 								<h2 className="mb-3 text-xl font-semibold">
 									Dirección de entrega
 								</h2>
+								{cookOrder.length > 1 && (
+									<p className="mb-3 text-xs text-muted-foreground">
+										Esta dirección se usará para todos tus pedidos.
+									</p>
+								)}
 								<div className="flex flex-col gap-3">
 									<button
 										type="button"
@@ -233,7 +366,7 @@ export function CustomerCheckoutPage() {
 							<div className="flex items-center justify-between">
 								<span className="text-sm text-muted-foreground">Subtotal</span>
 								<span className="text-lg font-bold">
-									{formatCurrency(subtotal)}
+									{formatCurrency(grandTotal)}
 								</span>
 							</div>
 							<p className="text-xs text-muted-foreground">
@@ -246,7 +379,7 @@ export function CustomerCheckoutPage() {
 								disabled={!canPlaceOrder}
 								onClick={handlePlaceOrder}
 							>
-								{isPlacingOrder ? "Enviando pedido..." : "Finalizar orden"}
+								{placeOrderLabel}
 							</Button>
 						</div>
 					</div>

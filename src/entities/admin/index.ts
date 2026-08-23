@@ -5,7 +5,7 @@ export {
 	listCooksPage,
 	listCustomers,
 	listCustomersPage,
-	listOrders,
+	listOrdersPage,
 	listProducts,
 	listProductsPage,
 	setCookActive,

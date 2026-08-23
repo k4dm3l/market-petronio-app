@@ -1,14 +1,12 @@
 import { Search } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router";
+import type { ReactNode } from "react";
 import type {
 	CustomerOrderHistoryItemDto,
 	OrderStatus,
 } from "@/entities/orders";
 import { Input } from "@/shared/components/ui/input";
-import { useDebouncedValue } from "@/shared/hooks";
 import { cn } from "@/shared/lib/utils";
-import { OrderListCard } from "./order-list-card";
+import { OrderListCard, OrderListCardSkeleton } from "./order-list-card";
 import { ORDER_STATUS_META } from "./order-status-badge";
 
 const STATUS_FILTERS: { value: OrderStatus | "all"; label: string }[] = [
@@ -20,9 +18,20 @@ const STATUS_FILTERS: { value: OrderStatus | "all"; label: string }[] = [
 ];
 
 interface OrdersListViewProps {
+	// Already filtered/paginated by the caller — status and search are
+	// applied server-side (GET /api/orders), this view is presentational.
 	orders: CustomerOrderHistoryItemDto[];
 	detailHrefFor: (id: string) => string;
 	emptyMessage: string;
+	search: string;
+	onSearchChange: (search: string) => void;
+	status: OrderStatus | "all";
+	onStatusChange: (status: OrderStatus | "all") => void;
+	// True while the first page is loading — search input and status chips
+	// stay interactive, only the list area swaps for skeleton cards.
+	isLoading?: boolean;
+	// Slot for a "Cargar más" button when the caller paginates.
+	footer?: ReactNode;
 }
 
 // Shared search + status filter + list, reused by both the cook and
@@ -32,61 +41,24 @@ export function OrdersListView({
 	orders,
 	detailHrefFor,
 	emptyMessage,
+	search,
+	onSearchChange,
+	status,
+	onStatusChange,
+	isLoading = false,
+	footer,
 }: OrdersListViewProps) {
-	const [searchParams, setSearchParams] = useSearchParams();
-
-	const status = searchParams.get("status") ?? "all";
-	const [searchInput, setSearchInput] = useState(searchParams.get("q") ?? "");
-	const debouncedSearch = useDebouncedValue(searchInput, 400);
-
-	const setStatus = (next: string) => {
-		setSearchParams(
-			(prev) => {
-				const params = new URLSearchParams(prev);
-				if (next === "all") params.delete("status");
-				else params.set("status", next);
-				return params;
-			},
-			{ replace: true },
-		);
-	};
-
-	// Only pushes to the URL once the user stops typing, so every keystroke
-	// doesn't spam a browser history / query-string update.
-	useEffect(() => {
-		setSearchParams(
-			(prev) => {
-				const params = new URLSearchParams(prev);
-				if (debouncedSearch) params.set("q", debouncedSearch);
-				else params.delete("q");
-				return params;
-			},
-			{ replace: true },
-		);
-	}, [debouncedSearch, setSearchParams]);
-
-	// The list endpoint only returns { id, status, paymentStatus, total,
-	// createdAt } — no order number — so search matches against the id.
-	const filtered = useMemo(() => {
-		const q = searchInput.trim().toLowerCase();
-		return orders.filter((order) => {
-			const matchesStatus = status === "all" || order.status === status;
-			const matchesQuery = !q || order.id.toLowerCase().includes(q);
-			return matchesStatus && matchesQuery;
-		});
-	}, [orders, status, searchInput]);
-
 	return (
 		<div className="flex flex-col gap-6">
 			<p className="text-sm text-muted-foreground">
-				{filtered.length} de {orders.length} pedidos
+				{orders.length} pedidos cargados
 			</p>
 
 			<div className="relative">
 				<Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
 				<Input
-					value={searchInput}
-					onChange={(event) => setSearchInput(event.target.value)}
+					value={search}
+					onChange={(event) => onSearchChange(event.target.value)}
 					placeholder="Buscar por número de pedido"
 					className="w-full pl-9"
 					aria-label="Buscar pedidos"
@@ -100,7 +72,7 @@ export function OrdersListView({
 						<button
 							key={filter.value}
 							type="button"
-							onClick={() => setStatus(filter.value)}
+							onClick={() => onStatusChange(filter.value)}
 							className={cn(
 								"h-12 shrink-0 rounded-full border px-4 text-sm font-medium whitespace-nowrap transition-colors",
 								isActive
@@ -114,20 +86,28 @@ export function OrdersListView({
 				})}
 			</div>
 
-			{filtered.length === 0 && (
+			{isLoading && (
+				<ul className="flex flex-col gap-3">
+					{Array.from({ length: 4 }).map((_, index) => (
+						<OrderListCardSkeleton key={index} />
+					))}
+				</ul>
+			)}
+
+			{!isLoading && orders.length === 0 && (
 				<div className="flex flex-col items-center gap-1 rounded-2xl border border-dashed border-border py-16 text-center">
 					<p className="text-sm font-medium">No se encontraron pedidos</p>
 					<p className="text-sm text-muted-foreground">
-						{searchInput || status !== "all"
+						{search || status !== "all"
 							? "Prueba con otro filtro o número de pedido."
 							: emptyMessage}
 					</p>
 				</div>
 			)}
 
-			{filtered.length > 0 && (
+			{!isLoading && orders.length > 0 && (
 				<ul className="flex flex-col gap-3">
-					{filtered.map((order) => (
+					{orders.map((order) => (
 						<OrderListCard
 							key={order.id}
 							order={order}
@@ -136,6 +116,8 @@ export function OrdersListView({
 					))}
 				</ul>
 			)}
+
+			{!isLoading && footer}
 		</div>
 	);
 }

@@ -56,6 +56,10 @@ export interface FindCooksQuery {
 	lng?: number;
 	/** Search radius in meters */
 	radius?: number;
+	/** Case-insensitive name search */
+	search?: string;
+	/** Comma-separated specialties, filtered server-side */
+	specialties?: string;
 }
 
 export interface CookLocationDto {

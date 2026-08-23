@@ -1,3 +1,5 @@
+import type { OrderStatus } from "@/entities/orders";
+
 export interface SetActiveDto {
 	isActive: boolean;
 }
@@ -23,7 +25,7 @@ export interface AdminSearchQuery {
 
 /** GET /api/admin/orders additionally supports a status filter. */
 export interface AdminOrdersQuery extends AdminSearchQuery {
-	status?: string;
+	status?: OrderStatus;
 }
 
 /** GET /api/admin/products only takes these — no `search` support server-side. */

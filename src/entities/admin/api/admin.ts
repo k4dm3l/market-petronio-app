@@ -86,14 +86,15 @@ export function setProductActive(
 		.then((res) => res.data);
 }
 
-export function listOrders(
+/** Full paginated envelope — for infinite-scroll consumers that need `pagination`. */
+export function listOrdersPage(
 	query: AdminOrdersQuery = {},
-): Promise<OrderResponseDto[]> {
+): Promise<PaginatedResponseDto<OrderResponseDto>> {
 	return http
 		.get<PaginatedResponseDto<OrderResponseDto>>("/api/admin/orders", {
 			params: query,
 		})
-		.then((res) => res.data.data);
+		.then((res) => res.data);
 }
 
 /** Full paginated envelope — for infinite-scroll consumers that need `pagination`. */

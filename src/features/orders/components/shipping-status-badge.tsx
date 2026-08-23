@@ -1,3 +1,4 @@
+import { Truck } from "lucide-react";
 import type { OrderShippingStatus as OrderShippingStatusType } from "@/entities/orders";
 import { OrderShippingStatus } from "@/entities/orders";
 import { StatusBadge, type StatusMeta } from "./status-badge";
@@ -5,7 +6,8 @@ import { StatusBadge, type StatusMeta } from "./status-badge";
 const SHIPPING_STATUS_META: Record<OrderShippingStatusType, StatusMeta> = {
 	[OrderShippingStatus.Pending]: {
 		label: "Pendiente",
-		className: "border-transparent bg-muted text-muted-foreground",
+		className:
+			"border-amber-600/15 bg-amber-600/10 text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-400",
 	},
 	[OrderShippingStatus.Preparing]: {
 		label: "Preparando",
@@ -39,5 +41,7 @@ interface ShippingStatusBadgeProps {
 }
 
 export function ShippingStatusBadge({ status }: ShippingStatusBadgeProps) {
-	return <StatusBadge status={status} meta={SHIPPING_STATUS_META} />;
+	return (
+		<StatusBadge status={status} meta={SHIPPING_STATUS_META} icon={Truck} />
+	);
 }

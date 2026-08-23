@@ -1,6 +1,7 @@
 import { http } from "@/shared/lib/http";
 import type {
 	CreateOrderDto,
+	CustomerOrderHistoryItemDto,
 	CustomerOrdersListResponseDto,
 	FindOrdersQuery,
 	OrderResponseDto,
@@ -15,14 +16,33 @@ export function create(payload: CreateOrderDto): Promise<OrderResponseDto> {
 		.then((res) => res.data);
 }
 
-// Customers get { data: CustomerOrderHistoryItemDto[] }; per the API description,
-// cooks/admins get the same pagination shape but with full OrderResponseDto[] in `data`.
+// Customers get { data: CustomerOrderHistoryItemDto[] } as documented — but
+// verified against a real cook-role response on 2026-08-22: cooks actually
+// get full OrderResponseDto[] in `data` (paymentStatus/total flat fields are
+// absent, values live under nested payment.status/totals.total instead).
+// Normalized here so every caller can rely on the documented summary shape.
+function normalizeOrderHistoryItem(
+	item: CustomerOrderHistoryItemDto | OrderResponseDto,
+): CustomerOrderHistoryItemDto {
+	return {
+		id: item.id,
+		status: item.status,
+		paymentStatus:
+			"paymentStatus" in item ? item.paymentStatus : item.payment.status,
+		total: "total" in item ? item.total : item.totals.total,
+		createdAt: item.createdAt,
+	};
+}
+
 export function findAll(
 	query: FindOrdersQuery = {},
 ): Promise<CustomerOrdersListResponseDto> {
 	return http
 		.get<CustomerOrdersListResponseDto>("/api/orders", { params: query })
-		.then((res) => res.data);
+		.then((res) => ({
+			...res.data,
+			data: res.data.data.map(normalizeOrderHistoryItem),
+		}));
 }
 
 export function findOne(id: string): Promise<OrderResponseDto> {

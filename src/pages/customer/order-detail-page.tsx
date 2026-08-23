@@ -1,16 +1,17 @@
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { Link, useParams } from "react-router";
+import { useGetOrder } from "@/entities/orders";
 import { OrderDetailView } from "@/features/orders";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import { CartSheet, Navbar } from "./components";
-import { MOCK_ORDER_DETAILS } from "./mock-order-details";
 
 // Read-only: unlike the cook detail page, customers don't get status/payment
 // controls here — just the order info.
 export function CustomerOrderDetailPage() {
 	const { id = "" } = useParams();
 	const [isCartOpen, setIsCartOpen] = useState(false);
-	const order = MOCK_ORDER_DETAILS.find((candidate) => candidate.id === id);
+	const { data: order, isPending: isOrderPending } = useGetOrder(id);
 
 	return (
 		<div className="flex h-screen flex-col overflow-hidden bg-background">
@@ -26,7 +27,14 @@ export function CustomerOrderDetailPage() {
 						Volver a mis órdenes
 					</Link>
 
-					{!order && (
+					{isOrderPending && (
+						<div className="flex flex-col gap-6">
+							<Skeleton className="h-10 w-2/3 rounded-lg" />
+							<Skeleton className="h-48 rounded-2xl" />
+						</div>
+					)}
+
+					{!isOrderPending && !order && (
 						<p className="text-sm text-muted-foreground">
 							Pedido no encontrado.{" "}
 							<Link to="/my-orders" className="underline">

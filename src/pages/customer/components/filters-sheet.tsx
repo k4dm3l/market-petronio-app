@@ -1,5 +1,5 @@
 import { SlidersHorizontal } from "lucide-react";
-import type { Category } from "@/entities/categories";
+import type { ReactNode } from "react";
 import { Button } from "@/shared/components/ui/button";
 import {
 	Sheet,
@@ -8,23 +8,14 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@/shared/components/ui/sheet";
-import type { ProductFilters } from "../filters";
-import { FiltersPanel } from "./filters-panel";
 
 interface FiltersSheetProps {
-	categories: Category[];
-	tags: string[];
-	filters: ProductFilters;
-	onChange: (filters: ProductFilters) => void;
-	onClear: () => void;
-	hasActiveFilters: boolean;
 	activeCount: number;
+	/** The filters panel for the current view (products or cooks). */
+	children: ReactNode;
 }
 
-export function FiltersSheet({
-	activeCount,
-	...panelProps
-}: FiltersSheetProps) {
+export function FiltersSheet({ activeCount, children }: FiltersSheetProps) {
 	return (
 		<Sheet>
 			<SheetTrigger
@@ -44,9 +35,7 @@ export function FiltersSheet({
 				<SheetHeader className="p-0">
 					<SheetTitle>Filtros</SheetTitle>
 				</SheetHeader>
-				<div className="mt-4">
-					<FiltersPanel {...panelProps} />
-				</div>
+				<div className="mt-4">{children}</div>
 			</SheetContent>
 		</Sheet>
 	);

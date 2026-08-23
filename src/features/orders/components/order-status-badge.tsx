@@ -1,3 +1,4 @@
+import { Package } from "lucide-react";
 import type { OrderStatus as OrderStatusType } from "@/entities/orders";
 import { OrderStatus } from "@/entities/orders";
 import { StatusBadge, type StatusMeta } from "./status-badge";
@@ -5,7 +6,8 @@ import { StatusBadge, type StatusMeta } from "./status-badge";
 export const ORDER_STATUS_META: Record<OrderStatusType, StatusMeta> = {
 	[OrderStatus.Pending]: {
 		label: "Pendiente",
-		className: "border-transparent bg-muted text-muted-foreground",
+		className:
+			"border-amber-600/15 bg-amber-600/10 text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-400",
 	},
 	[OrderStatus.Confirmed]: {
 		label: "Confirmado",
@@ -43,5 +45,7 @@ interface OrderStatusBadgeProps {
 }
 
 export function OrderStatusBadge({ status }: OrderStatusBadgeProps) {
-	return <StatusBadge status={status} meta={ORDER_STATUS_META} />;
+	return (
+		<StatusBadge status={status} meta={ORDER_STATUS_META} icon={Package} />
+	);
 }

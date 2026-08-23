@@ -1,35 +1,48 @@
-import { Receipt, ShoppingCart } from "lucide-react";
+import { MapPin, Pencil, Receipt, ShoppingCart } from "lucide-react";
+import { type ReactNode, useState } from "react";
 import { Link } from "react-router";
 import { useCart } from "@/entities/cart";
-import type { Category } from "@/entities/categories";
+import { useGetMe } from "@/entities/users";
+import { OnboardingAddressDialog } from "@/features/address";
 import { Separator } from "@/shared/components/ui/separator";
-import type { ProductFilters } from "../filters";
-import { FiltersPanel } from "./filters-panel";
+import { DEFAULT_COOK_LOCATION } from "@/shared/config";
 
 interface SidebarProps {
-	categories: Category[];
-	tags: string[];
-	filters: ProductFilters;
-	onChange: (filters: ProductFilters) => void;
-	onClear: () => void;
-	hasActiveFilters: boolean;
 	onOpenCart: () => void;
+	/** The filters panel for the current view (products or cooks). */
+	children: ReactNode;
 }
 
-export function Sidebar({
-	categories,
-	tags,
-	filters,
-	onChange,
-	onClear,
-	hasActiveFilters,
-	onOpenCart,
-}: SidebarProps) {
+export function Sidebar({ onOpenCart, children }: SidebarProps) {
 	const { itemCount } = useCart();
+	const { data: me } = useGetMe();
+	const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
+
+	const primaryAddress =
+		me?.addresses.find((address) => address.isPrimary) ?? me?.addresses[0];
+	const addressText =
+		primaryAddress?.address ??
+		me?.deliveryInformation?.address ??
+		DEFAULT_COOK_LOCATION.publicLocation;
 
 	return (
 		<aside className="hidden w-72 shrink-0 border-r border-border lg:block">
 			<div className="flex h-full flex-col overflow-y-auto p-6">
+				<button
+					type="button"
+					onClick={() => setIsAddressDialogOpen(true)}
+					className="group mb-4 flex items-center gap-2 rounded-lg bg-muted/50 px-2 py-2 text-left text-sm text-muted-foreground hover:bg-muted"
+				>
+					<MapPin className="size-4 shrink-0" />
+					<span className="min-w-0 flex-1 truncate">{addressText}</span>
+					<Pencil className="size-3.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100" />
+				</button>
+
+				<OnboardingAddressDialog
+					open={isAddressDialogOpen}
+					onOpenChange={setIsAddressDialogOpen}
+				/>
+
 				<nav className="flex flex-col gap-1">
 					<button
 						type="button"
@@ -58,14 +71,7 @@ export function Sidebar({
 
 				<Separator className="my-6" />
 
-				<FiltersPanel
-					categories={categories}
-					tags={tags}
-					filters={filters}
-					onChange={onChange}
-					onClear={onClear}
-					hasActiveFilters={hasActiveFilters}
-				/>
+				{children}
 			</div>
 		</aside>
 	);

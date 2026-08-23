@@ -66,10 +66,22 @@ export const queryKeys = {
 		all: () => ["orders"] as const,
 		list: (params?: Record<string, unknown>) =>
 			["orders", "list", params] as const,
+		// Nested under the same "list" prefix so invalidating `all()` also
+		// invalidates this infinite-scroll cache.
+		listInfinite: (params?: Record<string, unknown>) =>
+			params
+				? (["orders", "list", "infinite", params] as const)
+				: (["orders", "list", "infinite"] as const),
 		listAdmin: (params?: Record<string, unknown>) =>
 			params
 				? (["orders", "list-admin", params] as const)
 				: (["orders", "list-admin"] as const),
+		// Nested under the same "list-admin" prefix so invalidating
+		// `listAdmin()` (no args) also invalidates this infinite-scroll cache.
+		listAdminInfinite: (params?: Record<string, unknown>) =>
+			params
+				? (["orders", "list-admin", "infinite", params] as const)
+				: (["orders", "list-admin", "infinite"] as const),
 		detail: (id: string) => ["orders", "detail", id] as const,
 	},
 	stats: {

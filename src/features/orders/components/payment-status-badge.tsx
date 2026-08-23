@@ -1,3 +1,4 @@
+import { CreditCard } from "lucide-react";
 import type { OrderPaymentStatus as OrderPaymentStatusType } from "@/entities/orders";
 import { OrderPaymentStatus } from "@/entities/orders";
 import { StatusBadge, type StatusMeta } from "./status-badge";
@@ -5,7 +6,8 @@ import { StatusBadge, type StatusMeta } from "./status-badge";
 const PAYMENT_STATUS_META: Record<OrderPaymentStatusType, StatusMeta> = {
 	[OrderPaymentStatus.Pending]: {
 		label: "Pago pendiente",
-		className: "border-transparent bg-muted text-muted-foreground",
+		className:
+			"border-amber-600/15 bg-amber-600/10 text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-400",
 	},
 	[OrderPaymentStatus.PaymentInstructions]: {
 		label: "Esperando pago",
@@ -32,5 +34,7 @@ interface PaymentStatusBadgeProps {
 }
 
 export function PaymentStatusBadge({ status }: PaymentStatusBadgeProps) {
-	return <StatusBadge status={status} meta={PAYMENT_STATUS_META} />;
+	return (
+		<StatusBadge status={status} meta={PAYMENT_STATUS_META} icon={CreditCard} />
+	);
 }

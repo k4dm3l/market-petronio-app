@@ -2,12 +2,14 @@ import { Minus, Plus, Trash2, UtensilsCrossed } from "lucide-react";
 import type { CartItem } from "@/entities/cart";
 import { useCart } from "@/entities/cart";
 import { formatCurrency } from "@/shared/lib/format";
+import { cn } from "@/shared/lib/utils";
 
 interface CartLineItemProps {
 	item: CartItem;
+	disabled?: boolean;
 }
 
-export function CartLineItem({ item }: CartLineItemProps) {
+export function CartLineItem({ item, disabled = false }: CartLineItemProps) {
 	const { setQuantity, removeItem } = useCart();
 
 	return (
@@ -33,9 +35,13 @@ export function CartLineItem({ item }: CartLineItemProps) {
 					</span>
 					<button
 						type="button"
+						disabled={disabled}
 						onClick={() => removeItem(item.product.id)}
 						aria-label={`Eliminar ${item.product.name} del carrito`}
-						className="shrink-0 text-muted-foreground hover:text-destructive"
+						className={cn(
+							"shrink-0 text-muted-foreground hover:text-destructive",
+							disabled && "cursor-not-allowed opacity-50",
+						)}
 					>
 						<Trash2 className="size-4" />
 					</button>
@@ -47,18 +53,26 @@ export function CartLineItem({ item }: CartLineItemProps) {
 				<div className="mt-1 flex items-center gap-2">
 					<button
 						type="button"
+						disabled={disabled}
 						onClick={() => setQuantity(item.product.id, item.quantity - 1)}
 						aria-label={`Disminuir cantidad de ${item.product.name}`}
-						className="flex size-6 items-center justify-center rounded-md border border-input hover:bg-muted"
+						className={cn(
+							"flex size-6 items-center justify-center rounded-md border border-input hover:bg-muted",
+							disabled && "cursor-not-allowed opacity-50",
+						)}
 					>
 						<Minus className="size-3" />
 					</button>
 					<span className="w-6 text-center text-sm">{item.quantity}</span>
 					<button
 						type="button"
+						disabled={disabled}
 						onClick={() => setQuantity(item.product.id, item.quantity + 1)}
 						aria-label={`Aumentar cantidad de ${item.product.name}`}
-						className="flex size-6 items-center justify-center rounded-md border border-input hover:bg-muted"
+						className={cn(
+							"flex size-6 items-center justify-center rounded-md border border-input hover:bg-muted",
+							disabled && "cursor-not-allowed opacity-50",
+						)}
 					>
 						<Plus className="size-3" />
 					</button>
